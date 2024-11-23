@@ -32,7 +32,7 @@ This tool is fully web-based and does not require installation. Simply open the 
 ## Usage Instructions
 
 ### 1. Launch the Application
-Open the `metadata_filler.html` file in your preferred browser.
+Open the `index.html` file in your preferred browser.
 
 ### 2. Navigate Through Tabs
 The application consists of four main tabs:
