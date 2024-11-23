@@ -2,6 +2,8 @@
 
 The Enhanced Metadata Manager is a versatile, user-friendly web application that allows you to manage, modify, and optimize image metadata. Whether you are a professional photographer, a content creator, or just someone who wants better organization of images, this tool is built for you.
 
+You Can Access it Via [Netlify](https://exifly.netlify.app) or [Vercel](exifly.vercel.app)
+
 ## Features
 
 ### 1. Metadata Generation
