@@ -473,13 +473,16 @@
                             return Array.from(arr);
                         }
         
+                        // Combine categories into a single, semicolon-separated string
+                        const categoriesTag = metadata.categories.join(', ') + ';';
+        
                         // Update zeroth IFD
                         exifObj["0th"] = {
                             ...exifObj["0th"],
                             [piexif.ImageIFD.XPTitle]: encodeUTF16(metadata.title || ''),
                             [piexif.ImageIFD.XPSubject]: encodeUTF16(metadata.subject || ''),
                             [piexif.ImageIFD.XPKeywords]: encodeUTF16(metadata.keywords || ''),
-                            [piexif.ImageIFD.XPComment]: encodeUTF16(metadata.categories.join(', ') || ''),
+                            [piexif.ImageIFD.XPComment]: encodeUTF16(categoriesTag),
                             [piexif.ImageIFD.Software]: "Images Manager By Faris - Glyphiez @ Indonesia 2024"
                         };
         
