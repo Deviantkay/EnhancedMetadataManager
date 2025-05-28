@@ -415,8 +415,6 @@
         const imageStyleInput = document.getElementById('imageStyle');
         const generateImageBtn = document.getElementById('generateImageBtn');
         const imageGenerationResultsDiv = document.getElementById('imageGenerationResults');
-        import { GoogleGenAI, Modality } from "@google/genai";
-        import * as fs from "node:fs";
 
         // Generate Metadata Tab specific elements
         const generateBtn = document.getElementById('generateBtn');
@@ -744,7 +742,6 @@
         }
         
         // --- Tab: Generate Images ---
-        // --- Tab: Generate Images ---
         generateImageBtn.addEventListener('click', async () => {
             const apiKey = imageGenApiKeyInput.value.trim();
             let model = imageGenModelInput.value.trim();
@@ -854,7 +851,6 @@
                             // "contents": [{ "parts": [{ "text": fullPrompt }] }], // Versi lama
                             "contents": fullPrompt, // Sesuai contoh SDK Anda, 'contents' adalah string
                             "generationConfig": {
-                               responseModalities: [Modality.TEXT, Modality.IMAGE],
                             },
                             "safetySettings": [ // Opsional, bisa disesuaikan
                                 { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
