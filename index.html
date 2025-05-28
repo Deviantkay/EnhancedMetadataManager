@@ -855,6 +855,7 @@
                             // "contents": [{ "parts": [{ "text": fullPrompt }] }], // Versi lama
                             "contents": fullPrompt, // Sesuai contoh SDK Anda, 'contents' adalah string
                             "generationConfig": {
+                                responseModalities: [Modality.TEXT, Modality.IMAGE],
                             },
                             "safetySettings": [ // Opsional, bisa disesuaikan
                                 { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
