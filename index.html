@@ -334,7 +334,7 @@
                         </div>
                          <div>
                             <label for="batchSoftware" class="block text-sm font-medium text-slate-700">Software</label>
-                            <input type="text" id="batchSoftware" value="AI Content Suite by Faris - Glyphiez @ Indonesia 2024" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
+                            <input type="text" id="batchSoftware" value="AI Content Suite by Glyphiez @ Indonesia 2024" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
                         </div>
                     </div>
                      <div class="border border-slate-200 rounded-lg p-4">
@@ -709,7 +709,7 @@
                         if (metadata.author) exifObj["0th"][piexif.ImageIFD.Artist] = metadata.author; 
                         if (metadata.copyright) exifObj["0th"][piexif.ImageIFD.Copyright] = metadata.copyright; 
                         
-                        const defaultSoftware = "AI Content Suite by Faris - Glyphiez @ Indonesia " + new Date().getFullYear();
+                        const defaultSoftware = "AI Content Suite by Glyphiez @ Indonesia " + new Date().getFullYear();
                         if (metadata.software) exifObj["0th"][piexif.ImageIFD.Software] = metadata.software;
                         else if (!exifObj["0th"][piexif.ImageIFD.Software] && metadata.software !== null) { // Set default only if not explicitly cleared
                              exifObj["0th"][piexif.ImageIFD.Software] = defaultSoftware;
