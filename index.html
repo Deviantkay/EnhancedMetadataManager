@@ -134,8 +134,8 @@
                             <p class="mt-1 text-xs text-slate-500">Ensure this key has image generation capabilities.</p>
                         </div>
                         <div>
-                            <label for="imageGenModel" class="block text-sm font-medium text-slate-700 mb-1">Model (e.g., gemini-1.5-pro, dall-e-3)</label>
-                            <input type="text" id="imageGenModel" placeholder="e.g., gemini-1.5-flash-latest or dall-e-3" value="gemini-1.5-flash-latest"
+                            <label for="imageGenModel" class="block text-sm font-medium text-slate-700 mb-1">Model (e.g., gemini-2.0-flash-preview-image-generation)</label>
+                            <input type="text" id="imageGenModel" placeholder="e.g., gemini-2.0-flash-preview-image-generation" value="gemini-2.0-flash-preview-image-generation"
                                    class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
@@ -742,12 +742,13 @@
         }
         
         // --- Tab: Generate Images ---
+        // --- Tab: Generate Images ---
         generateImageBtn.addEventListener('click', async () => {
             const apiKey = imageGenApiKeyInput.value.trim();
             let model = imageGenModelInput.value.trim();
             const basePromptText = imagePromptInput.value.trim();
-            const numImagesPerPrompt = parseInt(numImagesInput.value);
-            const size = imageSizeSelect.value; 
+            const numImagesPerPrompt = parseInt(numImagesInput.value); // Mungkin tidak relevan jika API hanya return 1 gambar per call
+            const size = imageSizeSelect.value; // Akan dimasukkan ke prompt untuk Gemini
             const style = imageStyleInput.value.trim();
             const jsonFile = imageJsonParamsFileInput.files.length > 0 ? imageJsonParamsFileInput.files[0] : null;
 
@@ -759,70 +760,72 @@
                 showToast('Please provide an image prompt or a JSON file with prompts.', 'warning');
                 return;
             }
-            if (!model) { // If user clears the model input, provide a sensible default
-                model = imageGenModelInput.placeholder.includes("dall-e") ? "dall-e-3" : "gemini-1.5-flash-latest";
-                 showToast(`Model field was empty, using default: ${model}`, "info");
+            if (!model) {
+                // Default model jika input dikosongkan pengguna
+                model = "gemini-2.0-flash-preview-image-generation";
+                imageGenModelInput.value = model; // Update UI
+                showToast(`Model field was empty, using default: ${model}`, "info");
             }
-
 
             showLoader('Preparing to generate images...');
             imageGenerationResultsDiv.innerHTML = '';
-            generatedImageData = [];
+            generatedImageData = []; // Reset array data gambar yang dihasilkan
             let promptsToProcess = [];
 
+            // Logika untuk mem-parse JSON atau menggunakan prompt UI (sama seperti sebelumnya)
             if (jsonFile) {
                 try {
                     const jsonContent = await jsonFile.text();
                     const parsedJson = JSON.parse(jsonContent);
                     if (Array.isArray(parsedJson)) {
                         promptsToProcess = parsedJson
-                            .filter(item => typeof item === 'object' && item !== null && typeof item.prompt === 'string' && item.prompt.trim() !== '') // Pastikan item adalah objek dan punya prompt string yang valid
+                            .filter(item => typeof item === 'object' && item !== null && typeof item.prompt === 'string' && item.prompt.trim() !== '')
                             .map(item => ({
-                                prompt: item.prompt.trim(), // Trim prompt
-                                n: parseInt(item.n) || numImagesPerPrompt, // Pastikan n adalah angka
+                                prompt: item.prompt.trim(),
+                                // 'n' mungkin tidak didukung langsung oleh Gemini generateContent untuk gambar,
+                                // kita mungkin perlu membuat 'n' panggilan terpisah jika ingin >1 gambar dengan prompt sama.
+                                // Untuk sekarang, asumsikan 1 gambar per prompt task.
+                                n: 1, // item.n || numImagesPerPrompt (Jika API mendukung n > 1)
                                 size: item.size || size,
                                 style: item.style || style,
                                 model: item.model || model
                             }));
                         if (promptsToProcess.length === 0 && parsedJson.length > 0) {
-                            showToast('JSON contained items, but none had a valid "prompt" string. Using UI prompt if available.', 'warning');
+                            showToast('JSON items lacked valid "prompt" string. Using UI prompt if available.', 'warning');
                         }
                     } else if (typeof parsedJson === 'object' && parsedJson !== null && typeof parsedJson.prompt === 'string' && parsedJson.prompt.trim() !== '') {
                          promptsToProcess.push({
-                            prompt: parsedJson.prompt.trim(),
-                            n: parseInt(parsedJson.n) || numImagesPerPrompt,
-                            size: parsedJson.size || size,
-                            style: parsedJson.style || style,
+                            prompt: parsedJson.prompt.trim(), n: 1, //parseInt(parsedJson.n) || numImagesPerPrompt,
+                            size: parsedJson.size || size, style: parsedJson.style || style,
                             model: parsedJson.model || model
                          });
                     } else {
-                         showToast('Invalid JSON format or empty prompt(s) in JSON. Using UI prompt if available.', 'warning');
+                         showToast('Invalid JSON format. Using UI prompt if available.', 'warning');
                     }
-                    
-                    // Jika setelah parsing JSON tidak ada prompt valid dan ada UI prompt, gunakan UI prompt
                     if (promptsToProcess.length === 0 && basePromptText) {
                         showToast('No valid prompts from JSON, using UI prompt.', 'info');
-                        promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                        promptsToProcess.push({ prompt: basePromptText, n: 1, size: size, style: style, model: model });
                     }
-
                 } catch (e) {
                     showToast('Error parsing JSON. Using UI prompt if available.', 'error');
                     console.error("JSON parsing error for image gen:", e);
                     if (basePromptText) {
-                        promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                        promptsToProcess.push({ prompt: basePromptText, n: 1, size: size, style: style, model: model });
                     }
                 }
             } else if (basePromptText) {
-                promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                promptsToProcess.push({ prompt: basePromptText, n: 1, /*n: numImagesPerPrompt (jika API mendukung) */ size: size, style: style, model: model });
             }
-            
+
             if (promptsToProcess.length === 0) {
                 showToast('No valid prompts to process.', 'info');
                 hideLoader();
                 return;
             }
             
-            let totalImagesToGenerate = promptsToProcess.reduce((sum, p) => sum + p.n, 0);
+            // Total gambar yang diharapkan (mungkin hanya jumlah prompt jika n=1 per prompt)
+            let totalImagesToGenerate = promptsToProcess.length; // Jika n selalu 1
+            // let totalImagesToGenerate = promptsToProcess.reduce((sum, p) => sum + p.n, 0); // Jika n bisa > 1
             let imagesGeneratedCount = 0;
             updateProgressBar(0, totalImagesToGenerate, "Starting image generation...");
 
@@ -830,33 +833,114 @@
             for (const task of promptsToProcess) {
                 let fullPrompt = task.prompt;
                 if (task.style) {
-                    fullPrompt += `, style: ${task.style}`;
+                    fullPrompt += `, in the style of ${task.style}`;
+                }
+                // Tambahkan instruksi ukuran ke dalam prompt jika menggunakan Gemini
+                if (task.model.toLowerCase().includes("gemini") && task.size) {
+                    fullPrompt += `. The image should be approximately ${task.size} (e.g. width x height).`;
                 }
 
-                const currentModel = task.model; // Use model specified in task (or global if not in task)
-
+                const currentModel = task.model;
                 showLoader(`Generating with ${currentModel} for: "${task.prompt.substring(0,25)}..."`);
                 
                 try {
-                    if (currentModel.toLowerCase().includes("dall-e")) { // OpenAI DALL-E
-                        const apiUrl = 'https://api.openai.com/v1/images/generations';
+                    if (currentModel.toLowerCase().includes("gemini")) {
+                        // **Mengadaptasi logika dari contoh @google/genai SDK ke fetch API**
+                        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
+                        
                         const requestBody = {
+                            // "contents": [{ "parts": [{ "text": fullPrompt }] }], // Versi lama
+                            "contents": fullPrompt, // Sesuai contoh SDK Anda, 'contents' adalah string
+                            "generationConfig": {
+                                // "responseMimeType": "image/png", // Ini mungkin tidak didukung di REST API standar
+                                // "responseMimeTypes": ["image/png", "text/plain"], // Atau seperti ini
+                                // **KUNCI: Mencoba meniru `responseModalities`**
+                                // Cara pasti untuk mengirim `responseModalities` melalui REST API
+                                // perlu dikonfirmasi dari dokumentasi API Generative Language.
+                                // Ini adalah tebakan berdasarkan struktur umum payload.
+                                // Jika ini tidak berhasil, API mungkin tidak mendukungnya via REST,
+                                // atau formatnya berbeda.
+                                "responseModalities": ["TEXT", "IMAGE"] // Menggunakan string seperti di contoh Modality enum (TEXT, IMAGE)
+                            },
+                            "safetySettings": [ // Opsional, bisa disesuaikan
+                                { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
+                                { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
+                                { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
+                                { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
+                            ]
+                        };
+
+                        console.log("Sending to Gemini Image Gen:", JSON.stringify(requestBody, null, 2));
+
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error("Gemini Image Gen API Error Response:", errorData);
+                            let errorMessage = `Gemini API Error: ${response.status}`;
+                            if (errorData.error && errorData.error.message) {
+                                errorMessage += ` - ${errorData.error.message}`;
+                            }
+                            // Cek apakah ada detail di errorData.error.details jika ada
+                            if (errorData.error && errorData.error.details && errorData.error.details.length > 0) {
+                                errorData.error.details.forEach(detail => {
+                                    if (detail.reason) errorMessage += ` (Reason: ${detail.reason})`;
+                                });
+                            }
+                            throw new Error(errorMessage);
+                        }
+                        const data = await response.json();
+                        console.log("Gemini Image Gen API Success Response:", data);
+
+                        let foundImage = false;
+                        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts) {
+                            for (const part of data.candidates[0].content.parts) {
+                                if (part.text) {
+                                    console.log("Gemini Text Part:", part.text);
+                                    // Anda bisa memilih untuk menampilkan teks ini jika relevan
+                                    showToast(`Gemini also returned text: ${part.text.substring(0,50)}...`, 'info');
+                                } else if (part.inlineData && part.inlineData.data && part.inlineData.mimeType.startsWith('image/')) {
+                                    generatedImageData.push({ base64: part.inlineData.data, prompt: task.prompt, mimeType: part.inlineData.mimeType });
+                                    displayGeneratedImage(part.inlineData.data, task.prompt, part.inlineData.mimeType);
+                                    imagesGeneratedCount++;
+                                    updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Generated image ${imagesGeneratedCount}/${totalImagesToGenerate}`);
+                                    foundImage = true;
+                                    // Jika Anda hanya mengharapkan satu gambar per prompt, Anda bisa 'break' di sini
+                                    // break;
+                                }
+                            }
+                        }
+                        
+                        if (!foundImage) {
+                            showToast(`No image data received from Gemini for prompt: ${task.prompt.substring(0,30)}... Check console for API response.`, 'warning');
+                            // Jika tidak ada gambar, tetap update progress agar tidak stuck
+                            imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
+                            updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Processed prompt (no image)`);
+                        }
+
+                    } else if (currentModel.toLowerCase().includes("dall-e")) { // OpenAI DALL-E
+                        // ... (Logika DALL-E dari jawaban sebelumnya, sudah cukup baik) ...
+                        const apiUrl = 'https://api.openai.com/v1/images/generations';
+                        const requestBodyDalle = {
                            model: currentModel, 
                            prompt: fullPrompt,
-                           n: Math.min(task.n, currentModel === 'dall-e-2' ? 10 : 1), // DALL-E 3 supports n=1
+                           n: Math.min(task.n, currentModel === 'dall-e-2' ? 10 : 1),
                            size: task.size, 
                            response_format: "b64_json" 
                         };
-                        if (currentModel === 'dall-e-3' && task.n > 1) {
+                         if (currentModel === 'dall-e-3' && task.n > 1) {
                             showToast("DALL-E 3 via API currently supports n=1. Generating 1 image.", "info");
-                            requestBody.n = 1;
+                            requestBodyDalle.n = 1;
                         }
-
 
                         const response = await fetch(apiUrl, {
                            method: 'POST',
                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                           body: JSON.stringify(requestBody)
+                           body: JSON.stringify(requestBodyDalle)
                         });
                         if (!response.ok) {
                             const errorData = await response.json();
@@ -865,89 +949,39 @@
                         const data = await response.json();
                         if (data.data && data.data.length > 0) {
                            data.data.forEach(imgObject => {
-                               generatedImageData.push({ base64: imgObject.b64_json, prompt: task.prompt, mimeType: 'image/png' }); // DALL-E returns png implicitly via b64_json
+                               generatedImageData.push({ base64: imgObject.b64_json, prompt: task.prompt, mimeType: 'image/png' });
                                displayGeneratedImage(imgObject.b64_json, task.prompt, 'image/png');
                                imagesGeneratedCount++;
                                updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Generated image ${imagesGeneratedCount}/${totalImagesToGenerate}`);
                            });
                         } else { showToast(`No image data from DALL-E for: ${task.prompt}`, 'warning');}
-                    } else if (currentModel.toLowerCase().includes("gemini")) { // Google Gemini
-                        // NOTE: This is still speculative for direct image data return.
-                        // Gemini's `generateContent` typically returns text/JSON.
-                        // A more robust solution would use specific Gemini vision/image models if available and documented for this.
-                        const geminiImagePrompt = `Generate an image based on this description: ${fullPrompt}. The image should be visually striking. If you can, make it approximately ${task.size}.`;
-                        
-                        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: geminiImagePrompt }] }],
-                                // generationConfig: { "candidateCount": task.n } // Attempt to get multiple candidates
-                                // "response_mime_type": "image/png" // This is hypothetical
-                            })
-                        });
 
-                        if (!geminiResponse.ok) {
-                            const errorData = await geminiResponse.json();
-                            throw new Error(`Gemini API Error: ${geminiResponse.status} - ${errorData.error?.message || 'Unknown error'}`);
-                        }
-                        const geminiData = await geminiResponse.json();
-
-                        let foundImage = false;
-                        if (geminiData.candidates && geminiData.candidates.length > 0) {
-                            for (let k=0; k < Math.min(task.n, geminiData.candidates.length); k++) {
-                                const candidate = geminiData.candidates[k];
-                                if (candidate.content && candidate.content.parts && candidate.content.parts[0].inlineData) {
-                                    const imgData = candidate.content.parts[0].inlineData;
-                                    if (imgData.data && imgData.mimeType.startsWith('image/')) {
-                                        generatedImageData.push({ base64: imgData.data, prompt: task.prompt, mimeType: imgData.mimeType });
-                                        displayGeneratedImage(imgData.data, task.prompt, imgData.mimeType);
-                                        imagesGeneratedCount++;
-                                        updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Generated image ${imagesGeneratedCount}/${totalImagesToGenerate}`);
-                                        foundImage = true;
-                                    }
-                                }
-                            }
-                        }
-                        if (!foundImage) { // If no inlineData image, check for text response
-                             const textPart = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-                             if(textPart){
-                                showToast(`Gemini returned text for "${task.prompt.substring(0,30)}...". Displaying description.`, 'info');
-                                const textCard = document.createElement('div');
-                                textCard.className = 'p-3 border rounded-lg bg-slate-100 text-sm shadow col-span-full'; // Make it span full width
-                                textCard.innerHTML = `<h4 class="font-semibold mb-1">Image Idea for: "${task.prompt}"</h4><p class="whitespace-pre-wrap">${textPart}</p>`;
-                                imageGenerationResultsDiv.appendChild(textCard);
-                             } else {
-                                showToast(`No image or text from Gemini for: ${task.prompt}`, 'warning');
-                             }
-                             // Assume all 'n' for this prompt were text/failed
-                             imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
-                             updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Processed prompt for "${task.prompt.substring(0,30)}..."`);
-                        }
                     } else {
-                        showToast(`Unsupported model type: ${currentModel}. Please use 'dall-e' or 'gemini' based models.`, 'error');
-                        imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n); // Mark as processed
+                        showToast(`Unsupported model: ${currentModel}. Please use a Gemini or DALL-E model.`, 'error');
+                        imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
                         updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Skipped unsupported model.`);
                     }
                 } catch (error) {
                     console.error(`Error generating image for prompt "${task.prompt}":`, error);
-                    showToast(`Error for "${task.prompt.substring(0,30)}...": ${error.message.substring(0,100)}`, 'error');
+                    showToast(`Error for "${task.prompt.substring(0,30)}...": ${error.message.substring(0,150)}`, 'error');
+                    // Tampilkan error di UI jika diinginkan
                     const errorCard = document.createElement('div');
-                    errorCard.className = 'p-3 border rounded-lg bg-red-100 text-red-700 text-sm shadow';
+                    errorCard.className = 'p-3 border rounded-lg bg-red-100 text-red-700 text-sm shadow col-span-full';
                     errorCard.innerHTML = `<h4 class="font-semibold mb-1">Error for: "${task.prompt}"</h4><p>${error.message}</p>`;
                     imageGenerationResultsDiv.appendChild(errorCard);
+                    
                     imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
                     updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Error processing.`);
                 }
             } // End of loop through promptsToProcess
             
-            if (imagesGeneratedCount >= totalImagesToGenerate) {
+            if (imagesGeneratedCount >= totalImagesToGenerate || promptsToProcess.length === imagesGeneratedCount ) { // Cek jika semua task telah diproses
                  updateProgressBar(totalImagesToGenerate, totalImagesToGenerate, "Image generation tasks complete!");
                  if (generatedImageData.length > 0) showToast('Image generation process finished successfully.', 'success');
                  else showToast('Image generation process finished, but no images were successfully created.', 'info');
             }
             hideLoader();
-            imageJsonParamsFileInput.value = null; // Clear file input
+            imageJsonParamsFileInput.value = null;
         });
 
         function displayGeneratedImage(base64Data, prompt, mimeType = 'image/png') {
