@@ -775,32 +775,47 @@
                     const jsonContent = await jsonFile.text();
                     const parsedJson = JSON.parse(jsonContent);
                     if (Array.isArray(parsedJson)) {
-                        promptsToProcess = parsedJson.map(item => ({
-                            prompt: item.prompt,
-                            n: item.n || numImagesPerPrompt,
-                            size: item.size || size,
-                            style: item.style || style,
-                            model: item.model || model // Allow JSON to override model per prompt
-                        }));
-                    } else if (typeof parsedJson === 'object' && parsedJson.prompt) {
+                        promptsToProcess = parsedJson
+                            .filter(item => typeof item === 'object' && item !== null && typeof item.prompt === 'string' && item.prompt.trim() !== '') // Pastikan item adalah objek dan punya prompt string yang valid
+                            .map(item => ({
+                                prompt: item.prompt.trim(), // Trim prompt
+                                n: parseInt(item.n) || numImagesPerPrompt, // Pastikan n adalah angka
+                                size: item.size || size,
+                                style: item.style || style,
+                                model: item.model || model
+                            }));
+                        if (promptsToProcess.length === 0 && parsedJson.length > 0) {
+                            showToast('JSON contained items, but none had a valid "prompt" string. Using UI prompt if available.', 'warning');
+                        }
+                    } else if (typeof parsedJson === 'object' && parsedJson !== null && typeof parsedJson.prompt === 'string' && parsedJson.prompt.trim() !== '') {
                          promptsToProcess.push({
-                            prompt: parsedJson.prompt, n: parsedJson.n || numImagesPerPrompt,
-                            size: parsedJson.size || size, style: parsedJson.style || style,
+                            prompt: parsedJson.prompt.trim(),
+                            n: parseInt(parsedJson.n) || numImagesPerPrompt,
+                            size: parsedJson.size || size,
+                            style: parsedJson.style || style,
                             model: parsedJson.model || model
                          });
                     } else {
-                         showToast('Invalid JSON. Expected array of {"prompt":...} or single {"prompt":...}. Using UI prompt.', 'warning');
-                         if(basePromptText) promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                         showToast('Invalid JSON format or empty prompt(s) in JSON. Using UI prompt if available.', 'warning');
                     }
+                    
+                    // Jika setelah parsing JSON tidak ada prompt valid dan ada UI prompt, gunakan UI prompt
+                    if (promptsToProcess.length === 0 && basePromptText) {
+                        showToast('No valid prompts from JSON, using UI prompt.', 'info');
+                        promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                    }
+
                 } catch (e) {
                     showToast('Error parsing JSON. Using UI prompt if available.', 'error');
                     console.error("JSON parsing error for image gen:", e);
-                    if(basePromptText) promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                    if (basePromptText) {
+                        promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                    }
                 }
             } else if (basePromptText) {
                 promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
             }
-
+            
             if (promptsToProcess.length === 0) {
                 showToast('No valid prompts to process.', 'info');
                 hideLoader();
