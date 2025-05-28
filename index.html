@@ -852,15 +852,7 @@
                             // "contents": [{ "parts": [{ "text": fullPrompt }] }], // Versi lama
                             "contents": fullPrompt, // Sesuai contoh SDK Anda, 'contents' adalah string
                             "generationConfig": {
-                                // "responseMimeType": "image/png", // Ini mungkin tidak didukung di REST API standar
-                                // "responseMimeTypes": ["image/png", "text/plain"], // Atau seperti ini
-                                // **KUNCI: Mencoba meniru `responseModalities`**
-                                // Cara pasti untuk mengirim `responseModalities` melalui REST API
-                                // perlu dikonfirmasi dari dokumentasi API Generative Language.
-                                // Ini adalah tebakan berdasarkan struktur umum payload.
-                                // Jika ini tidak berhasil, API mungkin tidak mendukungnya via REST,
-                                // atau formatnya berbeda.
-                                "responseModalities": ["TEXT", "IMAGE"] // Menggunakan string seperti di contoh Modality enum (TEXT, IMAGE)
+                               responseModalities: [Modality.TEXT, Modality.IMAGE],
                             },
                             "safetySettings": [ // Opsional, bisa disesuaikan
                                 { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
