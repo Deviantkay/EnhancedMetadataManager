@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Metadata Manager Pro</title>
+    <title>Enhanced Metadata & Image Manager Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/piexifjs"></script>
@@ -15,23 +15,26 @@
         }
         .file-drop-zone {
             border: 2px dashed #9ca3af; /* gray-400 */
-            padding: 2rem;
+            padding: 1.5rem; /* Adjusted padding */
             text-align: center;
             border-radius: 0.5rem;
             transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            cursor: pointer;
         }
         .file-drop-zone.dragover {
             background-color: #dbeafe; /* blue-100 */
             border-color: #3b82f6; /* blue-500 */
         }
         .toast {
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s ease-out;
+            visibility: visible;
         }
         .toast.hide {
             opacity: 0;
             transform: translateX(100%);
+            visibility: hidden;
         }
-        /* Custom scrollbar for results (optional) */
+        /* Custom scrollbar for results */
         .results-scroll::-webkit-scrollbar {
             width: 8px;
         }
@@ -46,6 +49,19 @@
         .results-scroll::-webkit-scrollbar-thumb:hover {
             background: #64748b; /* slate-500 */
         }
+        /* Ensure line-clamp works */
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+         .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased">
@@ -55,41 +71,44 @@
     <!-- Main Container -->
     <div class="min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-8 px-4 shadow-lg sticky top-0 z-40">
+        <header class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-6 px-4 shadow-lg sticky top-0 z-40">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-center sm:text-left mb-1">Metadata Manager Pro</h1>
-                    <p class="text-center sm:text-left text-blue-100">Streamlined image metadata operations</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left mb-1">AI Content Suite</h1>
+                    <p class="text-center sm:text-left text-blue-100 text-sm sm:text-base">Manage Metadata & Generate Images</p>
                 </div>
-                <!-- Bisa tambahkan logo atau navigasi lain di sini -->
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="flex-grow max-w-7xl mx-auto mt-6 mb-12 px-4 w-full">
             <!-- Tabs -->
-            <div class="flex flex-wrap border-b border-slate-300 mb-6 bg-white rounded-lg shadow-md p-2">
-                <button class="px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md hover:bg-blue-50 transition-colors tab-active" id="generateTabBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
-                    Generate
+            <div class="flex flex-wrap border-b border-slate-300 mb-6 bg-white rounded-lg shadow-md p-1 sm:p-2">
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center tab-active" id="generateImageTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>
+                    <span class="hidden sm:inline">Gen Images</span><span class="sm:hidden">Images</span>
                 </button>
-                <button class="px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md hover:bg-blue-50 transition-colors" id="readTabBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10.392C2.057 15.71 3.245 16 4.5 16h1.051c.13-.386.298-.75.5-1.089V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10.092c.202.34.37.703.5 1.09h4.449c.13-.386.298-.75.5-1.089V4.804C16.943 4.29 15.755 4 14.5 4zM10 2a1 1 0 00-1 1v12a1 1 0 002 0V3a1 1 0 00-1-1z" /></svg>
-                    Read
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center" id="generateTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                    <span class="hidden sm:inline">Gen Meta</span><span class="sm:hidden">Meta</span>
                 </button>
-                <button class="px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md hover:bg-blue-50 transition-colors" id="deleteTabBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                    Delete
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center" id="readTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10.392C2.057 15.71 3.245 16 4.5 16h1.051c.13-.386.298-.75.5-1.089V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10.092c.202.34.37.703.5 1.09h4.449c.13-.386.298-.75.5-1.089V4.804C16.943 4.29 15.755 4 14.5 4zM10 2a1 1 0 00-1 1v12a1 1 0 002 0V3a1 1 0 00-1-1z" /></svg>
+                    <span class="hidden sm:inline">Read Meta</span><span class="sm:hidden">Read</span>
                 </button>
-                <button class="px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md hover:bg-blue-50 transition-colors" id="convertTabBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewbox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2.586l-1.707-1.707A1 1 0 0010 10H9a1 1 0 00-.707.293L6.586 12H5V5zm11 5a1 1 0 100-2h-2a1 1 0 100 2h2z"/></svg>
-                    To JPEG
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center" id="deleteTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    <span class="hidden sm:inline">Del Meta</span><span class="sm:hidden">Del</span>
                 </button>
-                <button class="px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md hover:bg-blue-50 transition-colors" id="batchEditTabBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 inline-block mr-1">
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center" id="convertTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2" viewbox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2.586l-1.707-1.707A1 1 0 0010 10H9a1 1 0 00-.707.293L6.586 12H5V5zm11 5a1 1 0 100-2h-2a1 1 0 100 2h2z"/></svg>
+                    <span class="hidden sm:inline">To JPEG</span><span class="sm:hidden">JPEG</span>
+                </button>
+                <button class="px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center" id="batchEditTabBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 sm:h-5 sm:w-5 inline-block mr-1 sm:mr-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                     </svg>
-                    Batch Edit
+                    <span class="hidden sm:inline">Batch Edit</span><span class="sm:hidden">Batch</span>
                 </button>
             </div>
 
@@ -104,32 +123,93 @@
 
             <!-- Tab Contents -->
             <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8">
-                <!-- Generate Tab Content -->
-                <div id="generateContent" class="space-y-6">
+                <!-- Generate Images Tab Content -->
+                <div id="generateImageContent" class="space-y-6">
+                    <h2 class="text-xl font-semibold text-slate-800">Image Generation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="imageGenApiKey" class="block text-sm font-medium text-slate-700 mb-1">API Key (Gemini/OpenAI DALL-E etc.) <span class="text-red-500">*</span></label>
+                            <input type="password" id="imageGenApiKey" placeholder="Enter your Image Generation API key"
+                                   class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="mt-1 text-xs text-slate-500">Ensure this key has image generation capabilities.</p>
+                        </div>
+                        <div>
+                            <label for="imageGenModel" class="block text-sm font-medium text-slate-700 mb-1">Model (e.g., gemini-1.5-pro, dall-e-3)</label>
+                            <input type="text" id="imageGenModel" placeholder="e.g., gemini-1.5-flash-latest or dall-e-3" value="gemini-1.5-flash-latest"
+                                   class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="imagePrompt" class="block text-sm font-medium text-slate-700 mb-1">Image Prompt <span class="text-red-500">*</span></label>
+                        <textarea id="imagePrompt" rows="3" placeholder="e.g., A majestic lion with a crown of stars, digital art, fantasy."
+                                  class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Optional: Upload JSON for Batch Prompts / Parameters</label>
+                         <input type="file" id="imageJsonParamsFile" accept=".json"
+                                   class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <p class="mt-1 text-xs text-slate-500">JSON array: `[{"prompt": "cat", "n": 1}, {"prompt": "dog"}]`</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="numImages" class="block text-sm font-medium text-slate-700">Number of Images (per prompt)</label>
+                            <input type="number" id="numImages" value="1" min="1" max="4" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
+                            <p class="text-xs text-slate-500">Max 1-4 for most APIs.</p>
+                        </div>
+                        <div>
+                            <label for="imageSize" class="block text-sm font-medium text-slate-700">Image Size (for DALL-E)</label>
+                            <select id="imageSize" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
+                                <option value="1024x1024" selected>1024x1024</option>
+                                <option value="1792x1024">1792x1024</option>
+                                <option value="1024x1792">1024x1792</option>
+                                <option value="512x512">512x512</option>
+                                <option value="256x256">256x256</option>
+                            </select>
+                             <p class="text-xs text-slate-500">Gemini might need size in prompt.</p>
+                        </div>
+                        <div>
+                            <label for="imageStyle" class="block text-sm font-medium text-slate-700">Image Style (appended to prompt)</label>
+                            <input type="text" id="imageStyle" placeholder="e.g., photorealistic, watercolor" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
+                        </div>
+                    </div>
+
+                    <button id="generateImageBtn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>
+                        Generate Image(s)
+                    </button>
+
+                    <div id="imageGenerationResults" class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 results-scroll max-h-[60vh] overflow-y-auto">
+                        <!-- Generated images will appear here -->
+                    </div>
+                </div>
+
+                <!-- Generate Metadata Tab Content -->
+                <div id="generateContent" class="hidden space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Select Images (or drag & drop)</label>
                             <div id="generateFileDropZone" class="file-drop-zone">
                                 <input type="file" id="imageFiles" accept="image/*" multiple class="hidden">
-                                <p class="text-slate-500">Drag 'n' drop some files here, or click to select files</p>
-                                <ul id="generateImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside"></ul>
+                                <p class="text-slate-500">Drag 'n' drop files here, or click to select files</p>
+                                <ul id="generateImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside text-left"></ul>
                             </div>
                         </div>
                         <div>
-                            <label for="apiKeys" class="block text-sm font-medium text-slate-700 mb-1">Gemini API Keys <span class="text-red-500">*</span></label>
-                            <input type="text" id="apiKeys" placeholder="Enter comma-separated API keys"
+                            <label for="apiKeys" class="block text-sm font-medium text-slate-700 mb-1">Gemini API Keys (for Metadata) <span class="text-red-500">*</span></label>
+                            <input type="password" id="apiKeys" placeholder="Enter comma-separated API keys"
                                    class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                              <p class="mt-1 text-xs text-slate-500">Multiple keys will be rotated for batch processing.</p>
                         </div>
                     </div>
-
-                    <div>
+                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Optional: Upload JSON for Specific Metadata</label>
                          <input type="file" id="jsonMetadataFile" accept=".json"
                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="mt-1 text-xs text-slate-500">JSON can provide titles, subjects, keywords, categories, or extra context for Gemini. Match by filename.</p>
+                        <p class="mt-1 text-xs text-slate-500">JSON: `{"filename.jpg": {"title": "...", "context_for_gemini": "Focus on..."}}` or array of such.</p>
                     </div>
-
                     <div class="border border-slate-200 rounded-lg p-4">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-lg font-semibold text-slate-700">Content Categories (for Gemini)</h3>
@@ -139,15 +219,12 @@
                             </label>
                         </div>
                         <div id="generateCategoryGrid" class="category-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto pr-2">
-                            <!-- Categories will be dynamically inserted here -->
                         </div>
                     </div>
-
                     <div class="flex items-center">
                         <input type="checkbox" id="renameFiles" class="mr-2 h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <label for="renameFiles" class="text-sm text-slate-600">Rename files based on generated titles (e.g., "My_New_Title.jpg")</label>
+                        <label for="renameFiles" class="text-sm text-slate-600">Rename files based on generated titles</label>
                     </div>
-
                     <div class="flex flex-wrap gap-4 pt-2">
                         <button id="generateBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
@@ -165,7 +242,7 @@
                 <div id="readContent" class="hidden space-y-6">
                     <label class="block text-sm font-medium text-slate-700 mb-1">Select Image to Read Metadata (or drag & drop)</label>
                     <div id="readFileDropZone" class="file-drop-zone">
-                        <input type="file" id="readImageFile" accept="image/jpeg,image/png,image/webp" class="hidden">
+                        <input type="file" id="readImageFile" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
                         <p class="text-slate-500">Drag 'n' drop an image here, or click to select</p>
                     </div>
                     <img id="readImagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mx-auto rounded-lg shadow-md"/>
@@ -176,17 +253,17 @@
 
                 <!-- Delete Tab Content -->
                 <div id="deleteContent" class="hidden space-y-6">
-                     <label class="block text-sm font-medium text-slate-700 mb-1">Select Image to Remove App-Specific Metadata (or drag & drop)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Select JPEG Image to Remove App-Specific Metadata (or drag & drop)</label>
                     <div id="deleteFileDropZone" class="file-drop-zone">
                         <input type="file" id="deleteImageFile" accept="image/jpeg" class="hidden">
-                        <p class="text-slate-500">Drag 'n' drop an image here, or click to select</p>
+                        <p class="text-slate-500">Drag 'n' drop a JPEG image here, or click to select</p>
                     </div>
                     <img id="deleteImagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mx-auto rounded-lg shadow-md"/>
                     <button id="deleteMetadataBtn" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                         Clear App Metadata & Download
                     </button>
-                    <p class="text-xs text-slate-500">This will clear XPTitle, XPSubject, XPKeywords, XPComment, and Software tags set by this app. Other EXIF data remains.</p>
+                    <p class="text-xs text-slate-500">This will clear XPTitle, XPSubject, XPKeywords, XPComment, XPAuthor and Software tags. Other EXIF data remains.</p>
                 </div>
 
                 <!-- Convert Tab Content -->
@@ -195,7 +272,7 @@
                     <div id="convertFileDropZone" class="file-drop-zone">
                          <input type="file" id="convertImageFiles" accept="image/*" multiple class="hidden">
                          <p class="text-slate-500">Drag 'n' drop images here, or click to select</p>
-                         <ul id="convertImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside"></ul>
+                         <ul id="convertImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside text-left"></ul>
                     </div>
                     <div>
                         <label for="jpegQuality" class="block text-sm font-medium text-slate-700">JPEG Quality: <span id="jpegQualityValue">100</span>%</label>
@@ -216,16 +293,14 @@
                 
                 <!-- Batch Edit Tab Content -->
                 <div id="batchEditContent" class="hidden space-y-6">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Select Images to Batch Edit (or drag & drop)</label>
+                     <label class="block text-sm font-medium text-slate-700 mb-1">Select JPEG Images to Batch Edit (or drag & drop)</label>
                     <div id="batchEditFileDropZone" class="file-drop-zone">
                          <input type="file" id="batchEditImageFiles" accept="image/jpeg" multiple class="hidden">
                          <p class="text-slate-500">Drag 'n' drop JPEG images here, or click to select</p>
-                         <ul id="batchEditImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside"></ul>
+                         <ul id="batchEditImageList" class="mt-2 text-sm text-slate-600 list-disc list-inside text-left"></ul>
                     </div>
-                    
                     <h3 class="text-lg font-semibold text-slate-700 pt-2">Metadata to Apply</h3>
-                    <p class="text-xs text-slate-500 -mt-4">Leave fields blank to not change them, unless "Replace Existing" is specified for keywords. Use `{filename}` or `{original_title}` as placeholders in Title/Subject.</p>
-
+                    <p class="text-xs text-slate-500 -mt-4">Leave fields blank to not change them. Use `{filename}`, `{original_title}`, `{original_subject}`, `{date}` placeholders.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="batchTitle" class="block text-sm font-medium text-slate-700">Title</label>
@@ -240,11 +315,11 @@
                             <input type="text" id="batchKeywords" placeholder="e.g., travel, nature, holiday" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
                             <div class="mt-1">
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="keywordAction" value="append" class="form-radio text-blue-600" checked>
+                                    <input type="radio" name="keywordAction" value="append" class="form-radio text-blue-600 h-4 w-4" checked>
                                     <span class="ml-2 text-sm text-slate-600">Append to existing</span>
                                 </label>
                                 <label class="inline-flex items-center ml-4">
-                                    <input type="radio" name="keywordAction" value="replace" class="form-radio text-blue-600">
+                                    <input type="radio" name="keywordAction" value="replace" class="form-radio text-blue-600 h-4 w-4">
                                     <span class="ml-2 text-sm text-slate-600">Replace existing</span>
                                 </label>
                             </div>
@@ -259,18 +334,15 @@
                         </div>
                          <div>
                             <label for="batchSoftware" class="block text-sm font-medium text-slate-700">Software</label>
-                            <input type="text" id="batchSoftware" placeholder="e.g., Metadata Manager Pro" value="Metadata Manager Pro by Faris - Glyphiez @ Indonesia 2024" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
+                            <input type="text" id="batchSoftware" value="AI Content Suite by Faris - Glyphiez @ Indonesia 2024" class="mt-1 w-full p-2 border border-slate-300 rounded-md">
                         </div>
                     </div>
-
-                    <div class="border border-slate-200 rounded-lg p-4">
+                     <div class="border border-slate-200 rounded-lg p-4">
                         <h3 class="text-lg font-semibold text-slate-700 mb-3">Categories (Optional)</h3>
                         <div id="batchEditCategoryGrid" class="category-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto pr-2">
-                            <!-- Categories will be dynamically inserted here -->
                         </div>
-                         <p class="text-xs text-slate-500 mt-2">Selected categories will be added to existing ones.</p>
+                         <p class="text-xs text-slate-500 mt-2">Selected categories will be added to existing ones (semicolon separated in XPComment).</p>
                     </div>
-                    
                     <div class="flex flex-wrap gap-4 pt-2">
                         <button id="batchEditApplyBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center">
                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
@@ -281,12 +353,12 @@
                     </div>
                      <div id="batchEditResults" class="space-y-4 results-scroll max-h-[50vh] overflow-y-auto"></div>
                 </div>
-
             </div>
         </main>
 
         <footer class="text-center py-6 text-sm text-slate-500 border-t border-slate-200">
-            Enhanced Metadata Manager Pro &copy; 2024. Crafted with ❤️.
+            AI Content Suite &copy; <span id="currentYear"></span>. Crafted with ❤️.
+            <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
         </footer>
     </div>
 
@@ -310,9 +382,10 @@
         ];
         CATEGORIES.sort();
 
-        let generatedFilesData = []; // To store { blob, metadata, originalName } for download all
-        let convertedFilesData = []; // To store { blob, newName } for download all
-        let batchEditedFilesData = []; // To store { blob, newName } for download all
+        let generatedFilesData = []; 
+        let convertedFilesData = []; 
+        let batchEditedFilesData = [];
+        let generatedImageData = []; // For storing base64 image data and prompts
 
         // --- UI Elements ---
         const loaderModal = document.getElementById('loaderModal');
@@ -323,14 +396,64 @@
         const progressCounterElem = document.getElementById('progressCounter');
         const toastContainer = document.getElementById('toastContainer');
 
-        // Tab buttons and content
         const TABS = {
+            generateImage: { btn: document.getElementById('generateImageTabBtn'), content: document.getElementById('generateImageContent') },
             generate: { btn: document.getElementById('generateTabBtn'), content: document.getElementById('generateContent') },
             read: { btn: document.getElementById('readTabBtn'), content: document.getElementById('readContent') },
             delete: { btn: document.getElementById('deleteTabBtn'), content: document.getElementById('deleteContent') },
             convert: { btn: document.getElementById('convertTabBtn'), content: document.getElementById('convertContent') },
             batchEdit: { btn: document.getElementById('batchEditTabBtn'), content: document.getElementById('batchEditContent') }
         };
+        
+        // Generate Images Tab specific elements
+        const imageGenApiKeyInput = document.getElementById('imageGenApiKey');
+        const imageGenModelInput = document.getElementById('imageGenModel');
+        const imagePromptInput = document.getElementById('imagePrompt');
+        const imageJsonParamsFileInput = document.getElementById('imageJsonParamsFile');
+        const numImagesInput = document.getElementById('numImages');
+        const imageSizeSelect = document.getElementById('imageSize');
+        const imageStyleInput = document.getElementById('imageStyle');
+        const generateImageBtn = document.getElementById('generateImageBtn');
+        const imageGenerationResultsDiv = document.getElementById('imageGenerationResults');
+
+        // Generate Metadata Tab specific elements
+        const generateBtn = document.getElementById('generateBtn');
+        const imageFilesInput = document.getElementById('imageFiles');
+        const apiKeysInput = document.getElementById('apiKeys'); // For metadata
+        const autoDetectCheckbox = document.getElementById('autoDetect');
+        const renameFilesCheckbox = document.getElementById('renameFiles');
+        const generateResultsDiv = document.getElementById('generateResults');
+        const downloadAllGeneratedBtn = document.getElementById('downloadAllGeneratedBtn');
+        const jsonMetadataFileInput = document.getElementById('jsonMetadataFile');
+
+        // Read Metadata Tab
+        const readImageFileInput = document.getElementById('readImageFile');
+        const metadataResultsDisplay = document.getElementById('metadataResultsDisplay');
+        const readImagePreview = document.getElementById('readImagePreview');
+        
+        // Delete Metadata Tab
+        const deleteImageFileInput = document.getElementById('deleteImageFile');
+        const deleteMetadataBtn = document.getElementById('deleteMetadataBtn');
+        const deleteImagePreview = document.getElementById('deleteImagePreview');
+
+        // Convert Tab
+        const convertImageFilesInput = document.getElementById('convertImageFiles');
+        const jpegQualitySlider = document.getElementById('jpegQuality');
+        const jpegQualityValueSpan = document.getElementById('jpegQualityValue');
+        const convertBtn = document.getElementById('convertBtn');
+        const convertResultsDiv = document.getElementById('convertResults');
+        const downloadAllConvertedBtn = document.getElementById('downloadAllConvertedBtn');
+
+        // Batch Edit Tab
+        const batchEditImageFilesInput = document.getElementById('batchEditImageFiles');
+        const batchTitleInput = document.getElementById('batchTitle');
+        const batchSubjectInput = document.getElementById('batchSubject');
+        const batchKeywordsInput = document.getElementById('batchKeywords');
+        const batchCopyrightInput = document.getElementById('batchCopyright');
+        const batchAuthorInput = document.getElementById('batchAuthor');
+        const batchSoftwareInput = document.getElementById('batchSoftware');
+        const batchEditApplyBtn = document.getElementById('batchEditApplyBtn');
+        const batchEditResultsDiv = document.getElementById('batchEditResults');
 
         // --- Helper Functions ---
         function showLoader(message = "Processing...") {
@@ -342,10 +465,10 @@
             loaderModal.classList.add('hidden');
         }
 
-        function showToast(message, type = 'info', duration = 3000) {
+        function showToast(message, type = 'info', duration = 3500) {
             const toast = document.createElement('div');
             toast.className = `toast p-4 rounded-lg shadow-lg text-white mb-2`;
-            let bgColor = 'bg-blue-500';
+            let bgColor = 'bg-blue-500'; // Default info
             if (type === 'success') bgColor = 'bg-green-500';
             else if (type === 'error') bgColor = 'bg-red-500';
             else if (type === 'warning') bgColor = 'bg-yellow-500 text-slate-800';
@@ -354,32 +477,35 @@
             toast.textContent = message;
             toastContainer.appendChild(toast);
 
+            // Auto hide
             setTimeout(() => {
                 toast.classList.add('hide');
-                setTimeout(() => toast.remove(), 500);
+                // Remove from DOM after transition
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
             }, duration);
         }
-
+        
         function updateProgressBar(current, total, message = "Processing files...") {
-            if (total === 0) {
+            if (total === 0 || current > total) { 
                 globalProgressContainer.classList.add('hidden');
                 return;
             }
             globalProgressContainer.classList.remove('hidden');
-            const percentage = total > 0 ? (current / total) * 100 : 0;
+            const percentage = total > 0 ? Math.min(100, (current / total) * 100) : 0;
             globalProgressBar.style.width = `${percentage}%`;
             progressMessageElem.textContent = message;
             progressCounterElem.textContent = `${current} / ${total} processed`;
 
-            if (current === total) {
-                setTimeout(() => { // Hide after a short delay when done
+            if (current >= total) { // Use >= for safety
+                setTimeout(() => { 
                     globalProgressContainer.classList.add('hidden');
-                }, 1500);
+                }, 2500); 
             }
         }
         
         function setupDragAndDrop(dropZoneId, fileInputId, fileListId = null, singleFilePreviewId = null, isSingleFile = false) {
             const dropZone = document.getElementById(dropZoneId);
+            if (!dropZone) return; 
             const fileInput = document.getElementById(fileInputId);
             const fileListElem = fileListId ? document.getElementById(fileListId) : null;
             const previewElem = singleFilePreviewId ? document.getElementById(singleFilePreviewId) : null;
@@ -397,75 +523,84 @@
                 dropZone.classList.remove('dragover');
                 const files = e.dataTransfer.files;
                 if (isSingleFile && files.length > 0) {
-                    fileInput.files = createFileList(files[0]); // Handle single file
-                } else {
+                    const dataTransfer = new DataTransfer(); 
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+                } else if (files.length > 0) { // Ensure files are actually dropped for multi-file
                     fileInput.files = files;
                 }
-                updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile);
-                // Trigger change event for consistency if other listeners depend on it
+                updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile, dropZone);
                 fileInput.dispatchEvent(new Event('change', { bubbles: true }));
             });
             fileInput.addEventListener('change', () => {
-                 updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile);
+                 updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile, dropZone);
             });
         }
 
-        function createFileList(file) { // Helper for single file drop
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            return dataTransfer.files;
-        }
+        function updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile, dropZone) {
+            const defaultText = dropZone.dataset.defaultText || "Drag 'n' drop files here, or click to select files";
+            const dropZoneParagraph = dropZone ? dropZone.querySelector('p') : null;
+             if (dropZone && !dropZone.dataset.defaultText) dropZone.dataset.defaultText = dropZoneParagraph?.textContent || defaultText;
 
-        function updateFileListDisplay(fileInput, fileListElem, previewElem, isSingleFile) {
-            if (fileListElem) fileListElem.innerHTML = ''; // Clear previous list for multi-file
 
-            if (isSingleFile && fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                if (fileListElem) { // Can be used to show filename for single file too
-                     const listItem = document.createElement('li');
-                     listItem.textContent = file.name;
-                     fileListElem.appendChild(listItem);
-                }
-                if (previewElem && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewElem.src = e.target.result;
-                        previewElem.classList.remove('hidden');
-                    }
-                    reader.readAsDataURL(file);
-                } else if (previewElem) {
-                    previewElem.classList.add('hidden');
-                    previewElem.src = "#";
-                }
-            } else if (fileListElem) {
-                 if (fileInput.files.length === 0) {
-                    const p = dropZone.querySelector('p');
-                    if (p) p.textContent = "Drag 'n' drop files here, or click to select files";
-                 } else {
-                    Array.from(fileInput.files).forEach(file => {
+            if (fileListElem) fileListElem.innerHTML = ''; 
+
+            if (isSingleFile) {
+                 if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (fileListElem) { // Though usually not used for single, can show name
                         const listItem = document.createElement('li');
                         listItem.textContent = file.name;
                         fileListElem.appendChild(listItem);
+                    }
+                    if (dropZoneParagraph) dropZoneParagraph.textContent = file.name;
+
+                    if (previewElem && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e_reader) => {
+                            previewElem.src = e_reader.target.result;
+                            previewElem.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(file);
+                    } else if (previewElem) {
+                        previewElem.classList.add('hidden');
+                        previewElem.src = "#";
+                    }
+                } else { // No file selected for single file input
+                    if (dropZoneParagraph) dropZoneParagraph.textContent = defaultText;
+                    if (previewElem) {
+                        previewElem.classList.add('hidden');
+                        previewElem.src = "#";
+                    }
+                }
+            } else { // For multiple files
+                 if (fileInput.files.length === 0) {
+                    if (dropZoneParagraph) dropZoneParagraph.textContent = defaultText;
+                 } else {
+                    Array.from(fileInput.files).forEach(file => {
+                        if (fileListElem) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = file.name;
+                            fileListElem.appendChild(listItem);
+                        }
                     });
-                    const p = dropZone.querySelector('p'); // Assuming dropZone is accessible or passed
-                    if (p) p.textContent = `${fileInput.files.length} file(s) selected`;
+                    if (dropZoneParagraph) dropZoneParagraph.textContent = `${fileInput.files.length} file(s) selected`;
                  }
             }
         }
 
-
         function populateCategoryGrid(gridId) {
             const categoryGrid = document.getElementById(gridId);
             if (!categoryGrid) return;
-            categoryGrid.innerHTML = ''; // Clear existing
+            categoryGrid.innerHTML = ''; 
             CATEGORIES.forEach(category => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center';
-                const inputId = `${gridId}-${category.toLowerCase().replace(/\s+/g, '-')}`;
+                const inputId = `${gridId}-${category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}`;
                 div.innerHTML = `
                     <input type="checkbox" id="${inputId}" 
                            name="${gridId}-categories" value="${category}" class="mr-2 h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                    <label for="${inputId}" class="text-sm text-slate-700">${category}</label>
+                    <label for="${inputId}" class="text-sm text-slate-700 cursor-pointer">${category}</label>
                 `;
                 categoryGrid.appendChild(div);
             });
@@ -478,48 +613,47 @@
 
         function encodeUTF16(str) {
             if (str === null || typeof str === 'undefined') str = '';
-            const arr = new Uint8Array(str.length * 2 + 2); // +2 for null terminator
+            const arr = new Uint8Array(str.length * 2 + 2); 
             for (let i = 0; i < str.length; i++) {
                 arr[i * 2] = str.charCodeAt(i) & 0xFF;
                 arr[i * 2 + 1] = str.charCodeAt(i) >> 8;
             }
-            // Null terminator
-            arr[arr.length - 2] = 0;
-            arr[arr.length - 1] = 0;
+            arr[arr.length - 2] = 0; arr[arr.length - 1] = 0; // Null terminator
             return Array.from(arr);
         }
 
         function decodeUTF16(arr) {
             if (!arr || !arr.length) return '';
             const uint8Arr = new Uint8Array(arr);
-            // Filter out null terminators before converting
             let filteredArr = [];
             for (let i = 0; i < uint8Arr.length; i += 2) {
-                if (uint8Arr[i] === 0 && uint8Arr[i + 1] === 0 && i >= uint8Arr.length - 2) { // Check for trailing null
+                if (uint8Arr[i] === 0 && uint8Arr[i + 1] === 0 && (i >= uint8Arr.length - 2 || i === str.length * 2) ) { // Check for null terminator
                     break;
                 }
                 filteredArr.push(uint8Arr[i]);
-                filteredArr.push(uint8Arr[i+1]);
+                if (i + 1 < uint8Arr.length) filteredArr.push(uint8Arr[i+1]);
             }
-            if (filteredArr.length === 0) return '';
-
+             if (filteredArr.length === 0) return '';
             const uint16Arr = new Uint16Array(new Uint8Array(filteredArr).buffer);
             return String.fromCharCode.apply(null, Array.from(uint16Arr));
         }
         
-        async function convertToJpeg(file, quality = 1.0) { // quality is 0.0 to 1.0
+        async function convertToJpeg(file, quality = 1.0) { 
             return new Promise((resolve, reject) => {
-                if (file.type === 'image/jpeg' && quality === 1.0) { // No conversion needed if already JPEG and max quality
-                    resolve(file); 
+                if (file.type === 'image/jpeg' && quality >= 0.99) { // No significant conversion needed
+                    // Create a new File object from the original blob to ensure it's mutable if needed later
+                    file.arrayBuffer().then(buffer => {
+                        resolve(new File([buffer], file.name, { type: file.type, lastModified: file.lastModified }));
+                    }).catch(reject);
                     return;
                 }
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+                    canvas.width = img.naturalWidth; // Use naturalWidth for accuracy
+                    canvas.height = img.naturalHeight;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
                     canvas.toBlob((blob) => {
                         if (blob) {
                             resolve(new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', {
@@ -530,22 +664,26 @@
                             reject(new Error('Canvas toBlob failed for JPEG conversion.'));
                         }
                     }, 'image/jpeg', quality);
+                    URL.revokeObjectURL(img.src); // Clean up object URL
                 };
-                img.onerror = () => reject(new Error('Image loading failed for JPEG conversion.'));
+                img.onerror = () => {
+                    URL.revokeObjectURL(img.src); // Clean up object URL
+                    reject(new Error('Image loading failed for JPEG conversion.'));
+                }
                 img.src = URL.createObjectURL(file);
             });
         }
 
         async function createExifImage(originalFile, metadata) {
-            // Ensure file is JPEG before processing EXIF, convert if necessary
             let fileToProcess = originalFile;
             if (originalFile.type !== 'image/jpeg') {
                 try {
-                    fileToProcess = await convertToJpeg(originalFile, 1.0); // Convert at max quality
+                    fileToProcess = await convertToJpeg(originalFile, 1.0); 
                 } catch (e) {
-                    console.error(`Failed to convert ${originalFile.name} to JPEG for EXIF editing:`, e);
-                    showToast(`Could not convert ${originalFile.name} to JPEG for metadata. Skipping EXIF for this file.`, 'error');
-                    return originalFile; // Return original if conversion fails
+                    console.error(`Failed to convert ${originalFile.name} to JPEG for EXIF:`, e);
+                    showToast(`Could not convert ${originalFile.name} to JPEG. EXIF not applied.`, 'error');
+                     // Return original file as a Blob
+                    return new Promise(resolve => originalFile.arrayBuffer().then(buffer => resolve(new Blob([buffer], {type: originalFile.type}))).catch(() => resolve(new Blob())));
                 }
             }
 
@@ -561,19 +699,20 @@
                             exifObj = {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": null};
                         }
         
-                        // Update 0th IFD
                         if (metadata.title) exifObj["0th"][piexif.ImageIFD.XPTitle] = encodeUTF16(metadata.title);
                         if (metadata.subject) exifObj["0th"][piexif.ImageIFD.XPSubject] = encodeUTF16(metadata.subject);
                         if (metadata.keywords) exifObj["0th"][piexif.ImageIFD.XPKeywords] = encodeUTF16(metadata.keywords);
                         
-                        const categoriesTag = Array.isArray(metadata.categories) ? metadata.categories.join('; ') : ''; // Semicolon separated
+                        const categoriesTag = Array.isArray(metadata.categories) ? metadata.categories.join('; ') : (metadata.categories || '');
                         if (categoriesTag) exifObj["0th"][piexif.ImageIFD.XPComment] = encodeUTF16(categoriesTag);
                         
-                        if (metadata.author) exifObj["0th"][piexif.ImageIFD.Artist] = metadata.author; // ASCII
-                        if (metadata.copyright) exifObj["0th"][piexif.ImageIFD.Copyright] = metadata.copyright; // ASCII
-                        if (metadata.software) exifObj["0th"][piexif.ImageIFD.Software] = metadata.software; // ASCII
-                        else if (!exifObj["0th"][piexif.ImageIFD.Software]) { // Set default if not batch editing specific software
-                             exifObj["0th"][piexif.ImageIFD.Software] = "Metadata Manager Pro by Faris - Glyphiez @ Indonesia 2024";
+                        if (metadata.author) exifObj["0th"][piexif.ImageIFD.Artist] = metadata.author; 
+                        if (metadata.copyright) exifObj["0th"][piexif.ImageIFD.Copyright] = metadata.copyright; 
+                        
+                        const defaultSoftware = "AI Content Suite by Faris - Glyphiez @ Indonesia " + new Date().getFullYear();
+                        if (metadata.software) exifObj["0th"][piexif.ImageIFD.Software] = metadata.software;
+                        else if (!exifObj["0th"][piexif.ImageIFD.Software] && metadata.software !== null) { // Set default only if not explicitly cleared
+                             exifObj["0th"][piexif.ImageIFD.Software] = defaultSoftware;
                         }
         
                         const exifBytes = piexif.dump(exifObj);
@@ -590,140 +729,347 @@
                     } catch (error) {
                         console.error(`Error embedding EXIF for ${fileToProcess.name}:`, error);
                         showToast(`EXIF update failed for ${fileToProcess.name}.`, 'error');
-                        resolve(new Blob([fileToProcess], {type: fileToProcess.type})); // Return original file as blob on error
+                         fileToProcess.arrayBuffer().then(buffer => resolve(new Blob([buffer], {type: fileToProcess.type}))).catch(() => resolve(new Blob()));
                     }
                 };
                 reader.onerror = () => {
                     console.error(`FileReader error for EXIF processing of ${fileToProcess.name}`);
                     showToast(`Could not read ${fileToProcess.name} for EXIF update.`, 'error');
-                    resolve(new Blob([fileToProcess], {type: fileToProcess.type}));
+                     fileToProcess.arrayBuffer().then(buffer => resolve(new Blob([buffer], {type: fileToProcess.type}))).catch(() => resolve(new Blob()));
                 };
                 reader.readAsDataURL(fileToProcess);
             });
         }
         
-        // --- Tab: Generate Metadata ---
-        const generateBtn = document.getElementById('generateBtn');
-        const imageFilesInput = document.getElementById('imageFiles');
-        const apiKeysInput = document.getElementById('apiKeys');
-        const autoDetectCheckbox = document.getElementById('autoDetect');
-        const renameFilesCheckbox = document.getElementById('renameFiles');
-        const generateResultsDiv = document.getElementById('generateResults');
-        const downloadAllGeneratedBtn = document.getElementById('downloadAllGeneratedBtn');
-        const jsonMetadataFileInput = document.getElementById('jsonMetadataFile');
+        // --- Tab: Generate Images ---
+        generateImageBtn.addEventListener('click', async () => {
+            const apiKey = imageGenApiKeyInput.value.trim();
+            let model = imageGenModelInput.value.trim();
+            const basePromptText = imagePromptInput.value.trim();
+            const numImagesPerPrompt = parseInt(numImagesInput.value);
+            const size = imageSizeSelect.value; 
+            const style = imageStyleInput.value.trim();
+            const jsonFile = imageJsonParamsFileInput.files.length > 0 ? imageJsonParamsFileInput.files[0] : null;
 
+            if (!apiKey) {
+                showToast('Please enter an API key for image generation.', 'warning');
+                return;
+            }
+            if (!basePromptText && !jsonFile) {
+                showToast('Please provide an image prompt or a JSON file with prompts.', 'warning');
+                return;
+            }
+            if (!model) { // If user clears the model input, provide a sensible default
+                model = imageGenModelInput.placeholder.includes("dall-e") ? "dall-e-3" : "gemini-1.5-flash-latest";
+                 showToast(`Model field was empty, using default: ${model}`, "info");
+            }
+
+
+            showLoader('Preparing to generate images...');
+            imageGenerationResultsDiv.innerHTML = '';
+            generatedImageData = [];
+            let promptsToProcess = [];
+
+            if (jsonFile) {
+                try {
+                    const jsonContent = await jsonFile.text();
+                    const parsedJson = JSON.parse(jsonContent);
+                    if (Array.isArray(parsedJson)) {
+                        promptsToProcess = parsedJson.map(item => ({
+                            prompt: item.prompt,
+                            n: item.n || numImagesPerPrompt,
+                            size: item.size || size,
+                            style: item.style || style,
+                            model: item.model || model // Allow JSON to override model per prompt
+                        }));
+                    } else if (typeof parsedJson === 'object' && parsedJson.prompt) {
+                         promptsToProcess.push({
+                            prompt: parsedJson.prompt, n: parsedJson.n || numImagesPerPrompt,
+                            size: parsedJson.size || size, style: parsedJson.style || style,
+                            model: parsedJson.model || model
+                         });
+                    } else {
+                         showToast('Invalid JSON. Expected array of {"prompt":...} or single {"prompt":...}. Using UI prompt.', 'warning');
+                         if(basePromptText) promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                    }
+                } catch (e) {
+                    showToast('Error parsing JSON. Using UI prompt if available.', 'error');
+                    console.error("JSON parsing error for image gen:", e);
+                    if(basePromptText) promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+                }
+            } else if (basePromptText) {
+                promptsToProcess.push({ prompt: basePromptText, n: numImagesPerPrompt, size: size, style: style, model: model });
+            }
+
+            if (promptsToProcess.length === 0) {
+                showToast('No valid prompts to process.', 'info');
+                hideLoader();
+                return;
+            }
+            
+            let totalImagesToGenerate = promptsToProcess.reduce((sum, p) => sum + p.n, 0);
+            let imagesGeneratedCount = 0;
+            updateProgressBar(0, totalImagesToGenerate, "Starting image generation...");
+
+
+            for (const task of promptsToProcess) {
+                let fullPrompt = task.prompt;
+                if (task.style) {
+                    fullPrompt += `, style: ${task.style}`;
+                }
+
+                const currentModel = task.model; // Use model specified in task (or global if not in task)
+
+                showLoader(`Generating with ${currentModel} for: "${task.prompt.substring(0,25)}..."`);
+                
+                try {
+                    if (currentModel.toLowerCase().includes("dall-e")) { // OpenAI DALL-E
+                        const apiUrl = 'https://api.openai.com/v1/images/generations';
+                        const requestBody = {
+                           model: currentModel, 
+                           prompt: fullPrompt,
+                           n: Math.min(task.n, currentModel === 'dall-e-2' ? 10 : 1), // DALL-E 3 supports n=1
+                           size: task.size, 
+                           response_format: "b64_json" 
+                        };
+                        if (currentModel === 'dall-e-3' && task.n > 1) {
+                            showToast("DALL-E 3 via API currently supports n=1. Generating 1 image.", "info");
+                            requestBody.n = 1;
+                        }
+
+
+                        const response = await fetch(apiUrl, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                           body: JSON.stringify(requestBody)
+                        });
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(`DALL-E Error: ${response.status} - ${errorData.error?.message || 'Unknown API error'}`);
+                        }
+                        const data = await response.json();
+                        if (data.data && data.data.length > 0) {
+                           data.data.forEach(imgObject => {
+                               generatedImageData.push({ base64: imgObject.b64_json, prompt: task.prompt, mimeType: 'image/png' }); // DALL-E returns png implicitly via b64_json
+                               displayGeneratedImage(imgObject.b64_json, task.prompt, 'image/png');
+                               imagesGeneratedCount++;
+                               updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Generated image ${imagesGeneratedCount}/${totalImagesToGenerate}`);
+                           });
+                        } else { showToast(`No image data from DALL-E for: ${task.prompt}`, 'warning');}
+                    } else if (currentModel.toLowerCase().includes("gemini")) { // Google Gemini
+                        // NOTE: This is still speculative for direct image data return.
+                        // Gemini's `generateContent` typically returns text/JSON.
+                        // A more robust solution would use specific Gemini vision/image models if available and documented for this.
+                        const geminiImagePrompt = `Generate an image based on this description: ${fullPrompt}. The image should be visually striking. If you can, make it approximately ${task.size}.`;
+                        
+                        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: geminiImagePrompt }] }],
+                                // generationConfig: { "candidateCount": task.n } // Attempt to get multiple candidates
+                                // "response_mime_type": "image/png" // This is hypothetical
+                            })
+                        });
+
+                        if (!geminiResponse.ok) {
+                            const errorData = await geminiResponse.json();
+                            throw new Error(`Gemini API Error: ${geminiResponse.status} - ${errorData.error?.message || 'Unknown error'}`);
+                        }
+                        const geminiData = await geminiResponse.json();
+
+                        let foundImage = false;
+                        if (geminiData.candidates && geminiData.candidates.length > 0) {
+                            for (let k=0; k < Math.min(task.n, geminiData.candidates.length); k++) {
+                                const candidate = geminiData.candidates[k];
+                                if (candidate.content && candidate.content.parts && candidate.content.parts[0].inlineData) {
+                                    const imgData = candidate.content.parts[0].inlineData;
+                                    if (imgData.data && imgData.mimeType.startsWith('image/')) {
+                                        generatedImageData.push({ base64: imgData.data, prompt: task.prompt, mimeType: imgData.mimeType });
+                                        displayGeneratedImage(imgData.data, task.prompt, imgData.mimeType);
+                                        imagesGeneratedCount++;
+                                        updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Generated image ${imagesGeneratedCount}/${totalImagesToGenerate}`);
+                                        foundImage = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (!foundImage) { // If no inlineData image, check for text response
+                             const textPart = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+                             if(textPart){
+                                showToast(`Gemini returned text for "${task.prompt.substring(0,30)}...". Displaying description.`, 'info');
+                                const textCard = document.createElement('div');
+                                textCard.className = 'p-3 border rounded-lg bg-slate-100 text-sm shadow col-span-full'; // Make it span full width
+                                textCard.innerHTML = `<h4 class="font-semibold mb-1">Image Idea for: "${task.prompt}"</h4><p class="whitespace-pre-wrap">${textPart}</p>`;
+                                imageGenerationResultsDiv.appendChild(textCard);
+                             } else {
+                                showToast(`No image or text from Gemini for: ${task.prompt}`, 'warning');
+                             }
+                             // Assume all 'n' for this prompt were text/failed
+                             imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
+                             updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Processed prompt for "${task.prompt.substring(0,30)}..."`);
+                        }
+                    } else {
+                        showToast(`Unsupported model type: ${currentModel}. Please use 'dall-e' or 'gemini' based models.`, 'error');
+                        imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n); // Mark as processed
+                        updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Skipped unsupported model.`);
+                    }
+                } catch (error) {
+                    console.error(`Error generating image for prompt "${task.prompt}":`, error);
+                    showToast(`Error for "${task.prompt.substring(0,30)}...": ${error.message.substring(0,100)}`, 'error');
+                    const errorCard = document.createElement('div');
+                    errorCard.className = 'p-3 border rounded-lg bg-red-100 text-red-700 text-sm shadow';
+                    errorCard.innerHTML = `<h4 class="font-semibold mb-1">Error for: "${task.prompt}"</h4><p>${error.message}</p>`;
+                    imageGenerationResultsDiv.appendChild(errorCard);
+                    imagesGeneratedCount = Math.min(totalImagesToGenerate, imagesGeneratedCount + task.n);
+                    updateProgressBar(imagesGeneratedCount, totalImagesToGenerate, `Error processing.`);
+                }
+            } // End of loop through promptsToProcess
+            
+            if (imagesGeneratedCount >= totalImagesToGenerate) {
+                 updateProgressBar(totalImagesToGenerate, totalImagesToGenerate, "Image generation tasks complete!");
+                 if (generatedImageData.length > 0) showToast('Image generation process finished successfully.', 'success');
+                 else showToast('Image generation process finished, but no images were successfully created.', 'info');
+            }
+            hideLoader();
+            imageJsonParamsFileInput.value = null; // Clear file input
+        });
+
+        function displayGeneratedImage(base64Data, prompt, mimeType = 'image/png') {
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'border rounded-lg shadow-md p-3 bg-white flex flex-col items-center text-center';
+            
+            const imgElement = document.createElement('img');
+            imgElement.src = `data:${mimeType};base64,${base64Data}`;
+            imgElement.alt = prompt;
+            imgElement.className = 'w-full h-auto object-contain rounded mb-2 max-h-64 min-h-[100px] bg-slate-200'; 
+
+            const promptText = document.createElement('p');
+            promptText.className = 'text-xs text-slate-600 mt-1 line-clamp-2';
+            promptText.title = prompt; // Full prompt on hover
+            promptText.textContent = prompt;
+
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-400';
+            downloadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>Download`;
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = imgElement.src;
+                // Sanitize filename from prompt
+                const safeFilename = prompt.replace(/[^a-z0-9]/gi, '_').substring(0, 40) || 'generated_image';
+                a.download = `${safeFilename}_${Date.now()}.${mimeType.split('/')[1] || 'png'}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            imgContainer.appendChild(imgElement);
+            imgContainer.appendChild(promptText);
+            imgContainer.appendChild(downloadBtn);
+            imageGenerationResultsDiv.appendChild(imgContainer);
+        }
+
+        // --- Tab: Generate Metadata ---
         async function processSingleFileWithGemini(file, apiKey, selectedCategories, autoDetect, customContext = "") {
             let fileToProcess = file;
             let mimeTypeForApi = file.type;
 
-            // Convert non-JPEGs to JPEG before sending to Gemini for potentially better analysis
-            // or if Gemini has specific preferences. For now, sending as-is or converted.
-            // It's often better to send original if possible, unless API requires specific format.
-            // The prompt specifies "Analyze this image", so original might be best.
-            // However, piexif works on JPEGs, so final output will be JPEG if metadata is added.
-
-            if (!file.type.match(/^image\/(jpeg|png|webp|gif)$/)) { // Gemini supports these
-                 try {
-                    // If we need to ensure it's one of the common types for Gemini
-                    // fileToProcess = await convertToJpeg(file, 0.9); // Example conversion
+            if (!file.type.match(/^image\/(jpeg|png|webp|gif|heic|heif)$/)) { // Common types Gemini might handle
+                try {
+                    // Attempt to convert to a more common format like JPEG if it's something obscure
+                    // showToast(`Converting ${file.name} to JPEG for Gemini analysis...`, 'info');
+                    // fileToProcess = await convertToJpeg(file, 0.92); // Good quality JPEG
                     // mimeTypeForApi = 'image/jpeg';
-                    showToast(`Warning: File ${file.name} is of uncommon type ${file.type}. Results may vary.`, 'warning');
+                     console.warn(`File ${file.name} is of type ${file.type}. Sending as-is to Gemini.`);
                 } catch(e){
-                    showToast(`Could not process ${file.name} due to format.`, 'error');
-                    return { title: "Error", subject: "File format issue", keywords: "", categories: [] };
+                    showToast(`Could not convert ${file.name} for analysis. Skipping.`, 'error');
+                    return { title: "Error", subject: "File format conversion issue", keywords: "", categories: [] };
                 }
             }
 
-
             const reader = new FileReader();
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => { // Removed reject, always resolve with status
                 reader.onload = async () => {
                     const base64Image = reader.result.split(',')[1];
                     try {
                         const shouldAutoDetectCats = autoDetect && selectedCategories.length === 0;
                         
-                        let prompt = `Analyze this image. ${customContext}\nProvide the output STRICTLY in JSON format with the following keys: "title" (string, descriptive), "subject" (string, detailed description), "keywords" (array of strings, comma separated in the final string output, comprehensive, aim for 20-40 relevant keywords), "categories" (array of strings, detected from the list if auto-detecting).`;
+                        let prompt = `Analyze this image carefully. ${customContext}\nProvide the output STRICTLY in JSON format. The JSON object should have these exact keys: "title" (string, concise and descriptive, max 10 words), "subject" (string, detailed description of the image content, people, actions, and setting, 50-100 words), "keywords" (array of 20-40 relevant string keywords, comma separated in the final string output for metadata tags, diverse including conceptual and object tags), "categories" (array of strings).`;
 
                         if (shouldAutoDetectCats) {
-                            prompt += `\nAvailable categories for detection: ${CATEGORIES.join(', ')}.`;
+                            prompt += `\nFor "categories", select the most relevant ones from this list: ${CATEGORIES.join(', ')}. Pick at least one, up to five.`;
                         } else if (selectedCategories.length > 0) {
-                            prompt += `\nFocus on these categories: ${selectedCategories.join(', ')}. The "categories" key in JSON should reflect these.`;
+                            prompt += `\nThe "categories" array in JSON should strictly be: ${JSON.stringify(selectedCategories)}. Do not add or change these.`;
+                        } else {
+                             prompt += `\nIf no categories are pre-selected and auto-detect is off, the "categories" array should be empty or contain only "Uncategorized".`;
                         }
-                        prompt += `\nExample JSON format: {"title": "Sunset Over Mountains", "subject": "A beautiful sunset...", "keywords": ["sunset", "mountains", "nature"], "categories": ["Landscape", "Nature"]}`;
-
+                        prompt += `\nExample output format: {"title": "...", "subject": "...", "keywords": ["tag1", "tag2", ...], "categories": ["Cat1", "Cat2"]}`;
 
                         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{
-                                    parts: [
-                                        { text: prompt },
-                                        { inlineData: { mimeType: mimeTypeForApi, data: base64Image } }
-                                    ]
+                                    parts: [ { text: prompt }, { inlineData: { mimeType: mimeTypeForApi, data: base64Image } } ]
                                 }],
-                                // Optional: Add safety settings if needed
-                                // "safetySettings": [
-                                //   { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-                                //   { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-                                //   // ... other categories
-                                // ],
-                                // "generationConfig": { "temperature": 0.7 } // Adjust creativity
+                                safetySettings: [ // More permissive safety settings
+                                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                                  ]
                             })
                         });
     
                         if (!response.ok) {
                             const errorData = await response.json();
-                            console.error("Gemini API Error Response:", errorData);
-                            throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                            console.error("Gemini API Error (Metadata):", errorData);
+                            throw new Error(`Gemini API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
                         }
     
                         const data = await response.json();
                         if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts) {
-                            console.error("Unexpected Gemini response structure:", data);
-                            throw new Error("Invalid response structure from Gemini API.");
+                            console.error("Unexpected Gemini response (Metadata):", data);
+                            throw new Error("Invalid response structure from Gemini API for metadata.");
                         }
                         const textResponse = data.candidates[0].content.parts[0].text || "";
                         
-                        let metadata;
+                        let metadataJson;
                         try {
-                            // Gemini might wrap JSON in ```json ... ``` or just output JSON.
                             const cleanJsonString = textResponse.replace(/^```json\s*|```$/g, '').trim();
-                            metadata = JSON.parse(cleanJsonString);
+                            metadataJson = JSON.parse(cleanJsonString);
                         } catch (e) {
-                            console.error("Failed to parse JSON from Gemini:", textResponse, e);
-                            // Fallback: try to extract from common text format if JSON fails badly
-                            // This is a simplified fallback, real implementation would be more robust
-                            const titleMatch = textResponse.match(/\*\*Title:\*\*\s*(.*)/i);
-                            const subjectMatch = textResponse.match(/\*\*Subject:\*\*\s*(.*)/i);
-                            const keywordsMatch = textResponse.match(/\*\*Keywords:\*\*\s*(.*)/i);
-                            const categoriesMatch = textResponse.match(/\*\*Categories:\*\*\s*(.*)/i);
-                            metadata = {
-                                title: titleMatch ? titleMatch[1].trim() : "N/A (Parsing Error)",
-                                subject: subjectMatch ? subjectMatch[1].trim() : "N/A (Parsing Error)",
-                                keywords: keywordsMatch ? keywordsMatch[1].trim().split(',').map(k => k.trim()) : [],
-                                categories: categoriesMatch ? categoriesMatch[1].trim().split(',').map(c => c.trim()) : (shouldAutoDetectCats ? [] : selectedCategories)
+                            console.error("Failed to parse JSON from Gemini (Metadata):", textResponse, e);
+                            showToast(`Warning: Could not parse Gemini's JSON response for ${file.name}. Attempting fallback.`, 'warning');
+                            // Basic text fallback (less reliable)
+                            const titleMatch = textResponse.match(/title["']?\s*:\s*["'](.*?)["']/i);
+                            const subjectMatch = textResponse.match(/subject["']?\s*:\s*["'](.*?)["']/i);
+                            // This fallback needs to be more robust or simply return error state
+                            metadataJson = {
+                                title: titleMatch ? titleMatch[1] : "N/A (Parsing Error)",
+                                subject: subjectMatch ? subjectMatch[1] : "N/A (Parsing Error)",
+                                keywords: "error parsing keywords",
+                                categories: shouldAutoDetectCats ? [] : selectedCategories
                             };
-                             showToast(`Warning: Could not parse Gemini's JSON response for ${file.name}. Used fallback.`, 'warning');
                         }
 
                         resolve({ 
-                            title: metadata.title || "N/A", 
-                            subject: metadata.subject || "N/A", 
-                            keywords: Array.isArray(metadata.keywords) ? metadata.keywords.join(', ') : (metadata.keywords || "N/A"),
-                            categories: Array.isArray(metadata.categories) ? metadata.categories : (shouldAutoDetectCats ? [] : selectedCategories)
+                            title: metadataJson.title || "N/A", 
+                            subject: metadataJson.subject || "N/A", 
+                            keywords: Array.isArray(metadataJson.keywords) ? metadataJson.keywords.join(', ') : (metadataJson.keywords || "N/A"),
+                            categories: Array.isArray(metadataJson.categories) ? metadataJson.categories : (shouldAutoDetectCats ? [] : selectedCategories)
                         });
 
                     } catch (error) {
-                        console.error(`Error processing file ${file.name} with Gemini:`, error);
-                        showToast(`Error for ${file.name}: ${error.message}`, 'error');
-                        resolve({ title: "Error", subject: error.message.substring(0,100), keywords: "", categories: [] }); // Return error info
+                        console.error(`Error processing metadata for ${file.name} with Gemini:`, error);
+                        showToast(`Metadata error for ${file.name}: ${error.message.substring(0,100)}`, 'error');
+                        resolve({ title: "Error", subject: error.message.substring(0,100), keywords: "", categories: [] });
                     }
                 };
                 reader.onerror = () => {
-                    console.error(`FileReader error for ${file.name}`);
-                    showToast(`Could not read file ${file.name}.`, 'error');
-                    reject(new Error(`FileReader error for ${file.name}`));
+                    console.error(`FileReader error for metadata processing of ${file.name}`);
+                    showToast(`Could not read file ${file.name} for metadata.`, 'error');
+                    resolve({ title: "Error", subject: "FileReader error", keywords: "", categories: [] });
                 };
                 reader.readAsDataURL(fileToProcess);
             });
@@ -736,16 +1082,16 @@
             const jsonFile = jsonMetadataFileInput.files.length > 0 ? jsonMetadataFileInput.files[0] : null;
 
             if (files.length === 0) {
-                showToast('Please select at least one image.', 'warning');
+                showToast('Please select at least one image for metadata generation.', 'warning');
                 return;
             }
             if (!apiKeysStr) {
-                showToast('Please enter at least one Gemini API key.', 'warning');
+                showToast('Please enter Gemini API key(s) for metadata.', 'warning');
                 return;
             }
             const apiKeys = apiKeysStr.split(',').map(key => key.trim()).filter(key => key);
             if (apiKeys.length === 0) {
-                showToast('Invalid API key format.', 'warning');
+                showToast('Invalid API key format for metadata.', 'warning');
                 return;
             }
 
@@ -753,64 +1099,63 @@
             generateResultsDiv.innerHTML = '';
             generatedFilesData = [];
             downloadAllGeneratedBtn.style.display = 'none';
+            updateProgressBar(0, files.length, "Starting metadata generation...");
             
             let userJsonData = {};
             if (jsonFile) {
                 try {
                     const jsonContent = await jsonFile.text();
                     const parsedJson = JSON.parse(jsonContent);
-                    if (Array.isArray(parsedJson)) {
+                    if (Array.isArray(parsedJson)) { // Array of objects, each with 'filename'
                         parsedJson.forEach(item => {
                             if (item.filename) userJsonData[item.filename] = item;
                         });
-                    } else if (typeof parsedJson === 'object') {
+                    } else if (typeof parsedJson === 'object') { // Single object with filenames as keys
                         userJsonData = parsedJson;
                     }
+                     showToast('JSON metadata loaded.', 'info');
                 } catch (e) {
-                    showToast('Error parsing JSON metadata file. Proceeding without it.', 'error');
-                    console.error("JSON parsing error:", e);
+                    showToast('Error parsing JSON metadata. Proceeding without it.', 'error');
+                    console.error("JSON metadata parsing error:", e);
                 }
             }
-
 
             try {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    updateProgressBar(i, files.length, `Processing ${file.name}...`);
-                    showLoader(`Processing ${file.name} (${i+1}/${files.length})`);
+                    updateProgressBar(i + 1, files.length, `Processing metadata for ${file.name}...`);
+                    showLoader(`Processing metadata for ${file.name} (${i+1}/${files.length})`);
 
                     let metadata;
                     const jsonDataForFile = userJsonData[file.name];
 
                     if (jsonDataForFile && jsonDataForFile.title && jsonDataForFile.subject && jsonDataForFile.keywords) {
-                        // Use metadata directly from JSON if all core fields are present
                         metadata = {
                             title: jsonDataForFile.title,
                             subject: jsonDataForFile.subject,
                             keywords: Array.isArray(jsonDataForFile.keywords) ? jsonDataForFile.keywords.join(', ') : jsonDataForFile.keywords,
-                            categories: jsonDataForFile.categories || getSelectedCategories('generateCategoryGrid') // Fallback to UI selection for categories
+                            categories: jsonDataForFile.categories || getSelectedCategories('generateCategoryGrid') 
                         };
                         showToast(`Used metadata from JSON for ${file.name}.`, 'info');
                     } else {
-                        // Generate with Gemini
                         const apiKey = apiKeys[i % apiKeys.length];
                         const selectedCats = getSelectedCategories('generateCategoryGrid');
                         const autoDetect = autoDetectCheckbox.checked;
                         const context = jsonDataForFile?.context_for_gemini || "";
                         metadata = await processSingleFileWithGemini(file, apiKey, selectedCats, autoDetect, context);
                         
-                        // If JSON provided partial data, merge it (JSON takes precedence)
-                        if (jsonDataForFile) {
+                        if (jsonDataForFile) { // Merge partial JSON data if Gemini was used
                             metadata.title = jsonDataForFile.title || metadata.title;
                             metadata.subject = jsonDataForFile.subject || metadata.subject;
-                            metadata.keywords = jsonDataForFile.keywords ? (Array.isArray(jsonDataForFile.keywords) ? jsonDataForFile.keywords.join(', ') : jsonDataForFile.keywords) : metadata.keywords;
-                            metadata.categories = jsonDataForFile.categories || metadata.categories;
+                            metadata.keywords = (jsonDataForFile.keywords ? (Array.isArray(jsonDataForFile.keywords) ? jsonDataForFile.keywords.join(', ') : jsonDataForFile.keywords) : metadata.keywords) || "N/A";
+                            metadata.categories = jsonDataForFile.categories || metadata.categories || [];
                         }
                     }
                     
                     const processedBlob = await createExifImage(file, metadata);
-                    const newFileName = shouldRename && metadata.title && metadata.title !== "N/A" && metadata.title !== "Error"
-                        ? `${metadata.title.replace(/[^a-z0-9_.\-]/gi, '_').substring(0, 50)}.jpg`
+                    const safeTitleForFilename = metadata.title && metadata.title !== "N/A" && metadata.title !== "Error" ? metadata.title.replace(/[^a-z0-9_.\-]/gi, '_').substring(0, 50) : null;
+                    const newFileName = shouldRename && safeTitleForFilename
+                        ? `${safeTitleForFilename}.jpg`
                         : `processed_${file.name.replace(/\.[^/.]+$/, '')}.jpg`;
 
                     generatedFilesData.push({ blob: processedBlob, metadata, originalName: file.name, newName: newFileName });
@@ -819,16 +1164,16 @@
                     resultCard.className = 'bg-slate-50 rounded-lg shadow p-4 mb-4 ring-1 ring-slate-200';
                     resultCard.innerHTML = `
                         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-blue-600 mb-2">${file.name}</h3>
+                            <div class="flex-1 min-w-0"> <!-- Added min-w-0 for flex child truncation -->
+                                <h3 class="text-lg font-semibold text-blue-600 mb-2 truncate" title="${file.name}">${file.name}</h3>
                                 <div class="space-y-1 text-sm text-slate-700">
-                                    <p><strong>Title:</strong> ${metadata.title}</p>
-                                    <p><strong>Subject:</strong> <span class="line-clamp-2">${metadata.subject}</span></p>
-                                    <p><strong>Keywords:</strong> <span class="line-clamp-2">${metadata.keywords}</span></p>
+                                    <p><strong>Title:</strong> <span class="line-clamp-1" title="${metadata.title}">${metadata.title}</span></p>
+                                    <p><strong>Subject:</strong> <span class="line-clamp-2" title="${metadata.subject}">${metadata.subject}</span></p>
+                                    <p><strong>Keywords:</strong> <span class="line-clamp-2" title="${metadata.keywords}">${metadata.keywords}</span></p>
                                     <p><strong>Categories:</strong> ${Array.isArray(metadata.categories) ? metadata.categories.join(', ') : 'None'}</p>
                                 </div>
                             </div>
-                            <button data-index="${i}" class="download-generated-btn mt-2 sm:mt-0 px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 flex items-center whitespace-nowrap">
+                            <button data-index="${generatedFilesData.length - 1}" class="download-generated-btn mt-2 sm:mt-0 px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 flex items-center whitespace-nowrap shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                                 Download
                             </button>
@@ -837,30 +1182,36 @@
                     generateResultsDiv.appendChild(resultCard);
                 }
                 
-                updateProgressBar(files.length, files.length, "All files processed!");
-                showToast(`Successfully generated metadata for ${files.length} image(s).`, 'success');
-
-                if (files.length > 0) {
-                    downloadAllGeneratedBtn.style.display = 'flex';
+                updateProgressBar(files.length, files.length, "All files processed for metadata!");
+                if (generatedFilesData.length > 0) {
+                     showToast(`Successfully generated metadata for ${generatedFilesData.length} image(s).`, 'success');
+                     downloadAllGeneratedBtn.style.display = 'flex';
+                } else if (files.length > 0) { // Files were processed but no successful data
+                     showToast(`Metadata generation process completed with issues for ${files.length} image(s).`, 'warning');
                 }
-                 imageFilesInput.value = null; // Clear file input
-                 document.getElementById('generateImageList').innerHTML = '';
+                 imageFilesInput.value = null; 
+                 const imageListElem = document.getElementById('generateImageList');
+                 if (imageListElem) imageListElem.innerHTML = '';
+                 const dropZonePara = document.querySelector('#generateFileDropZone p');
+                 if (dropZonePara) dropZonePara.textContent = document.getElementById('generateFileDropZone').dataset.defaultText || "Drag 'n' drop files here, or click to select files";
+                 jsonMetadataFileInput.value = null;
+
 
             } catch (error) {
-                console.error('Error during batch generation:', error);
+                console.error('Error during batch metadata generation:', error);
                 showToast(`An error occurred: ${error.message}`, 'error');
-                updateProgressBar(files.length, files.length, "Processing failed.");
+                updateProgressBar(files.length, files.length, "Metadata processing failed.");
             } finally {
                 hideLoader();
             }
         });
 
         generateResultsDiv.addEventListener('click', (e) => {
-            if (e.target.classList.contains('download-generated-btn') || e.target.closest('.download-generated-btn')) {
-                const button = e.target.classList.contains('download-generated-btn') ? e.target : e.target.closest('.download-generated-btn');
+            const button = e.target.closest('.download-generated-btn');
+            if (button) {
                 const index = parseInt(button.dataset.index);
                 const fileData = generatedFilesData[index];
-                if (fileData) {
+                if (fileData && fileData.blob && fileData.blob.size > 0) {
                     const url = URL.createObjectURL(fileData.blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -869,21 +1220,25 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
+                } else {
+                    showToast('Error: Processed file data is invalid or empty.', 'error');
                 }
             }
         });
 
         downloadAllGeneratedBtn.addEventListener('click', async () => {
-            if (generatedFilesData.length === 0) {
-                showToast('No files to download.', 'info');
+            const validFilesToZip = generatedFilesData.filter(fd => fd.blob && fd.blob.size > 0);
+            if (validFilesToZip.length === 0) {
+                showToast('No valid processed files to download.', 'info');
                 return;
             }
             showLoader('Zipping files...');
             const zip = new JSZip();
-            generatedFilesData.forEach(fileData => {
+            validFilesToZip.forEach(fileData => {
                 zip.file(fileData.newName, fileData.blob);
             });
             try {
+                updateProgressBar(0, 100, `Zipping... 0%`);
                 const content = await zip.generateAsync({type: 'blob'}, (metadata) => {
                     updateProgressBar(Math.floor(metadata.percent), 100, `Zipping... ${Math.floor(metadata.percent)}%`);
                 });
@@ -892,24 +1247,21 @@
                 a.href = url;
                 a.download = 'generated_metadata_images.zip';
                 document.body.appendChild(a);
-a.click();
+                a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 showToast('Zip file download started.', 'success');
+                updateProgressBar(100, 100, `Zipping complete!`);
             } catch (error) {
                 console.error("Error creating zip:", error);
                 showToast('Error creating zip file.', 'error');
+                 updateProgressBar(0, 0, `Zipping failed.`); // Reset progress
             } finally {
                 hideLoader();
-                updateProgressBar(1,1, "Zipping complete."); // Reset progress
             }
         });
 
         // --- Tab: Read Metadata ---
-        const readImageFileInput = document.getElementById('readImageFile');
-        const metadataResultsDisplay = document.getElementById('metadataResultsDisplay');
-        const readImagePreview = document.getElementById('readImagePreview');
-
         readImageFileInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) {
@@ -925,24 +1277,13 @@ a.click();
                 return;
             }
 
-            // Preview
-            const readerPreview = new FileReader();
-            readerPreview.onload = e => {
-                readImagePreview.src = e.target.result;
-                readImagePreview.classList.remove('hidden');
-            }
-            readerPreview.readAsDataURL(file);
-
             showLoader('Reading metadata...');
             try {
-                const metadata = await readAllMetadata(file); // Use the enhanced read function
+                const metadata = await readAllMetadata(file); 
                 metadataResultsDisplay.innerHTML = displayAllMetadataHTML(metadata, file.name);
             } catch (error) {
                 console.error('Error reading metadata:', error);
-                metadataResultsDisplay.innerHTML = `
-                    <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">
-                        Error reading metadata: ${error.message}
-                    </div>`;
+                metadataResultsDisplay.innerHTML = `<div class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">Error reading metadata: ${error.message}</div>`;
                 showToast(`Error reading metadata for ${file.name}.`, 'error');
             } finally {
                 hideLoader();
@@ -950,18 +1291,17 @@ a.click();
         });
 
         async function readAllMetadata(file) {
-            // Ensure JPEG for piexif
             let fileToRead = file;
-            if (file.type !== 'image/jpeg') {
+            if (file.type !== 'image/jpeg' && file.type !== 'image/tiff') { // piexif supports JPEG and TIFF
                 try {
-                    fileToRead = await convertToJpeg(file, 1.0); // Convert to read standard EXIF
+                     // showToast(`Note: Converting ${file.name} to JPEG for full EXIF reading.`, "info");
+                     fileToRead = await convertToJpeg(file, 1.0); 
                 } catch (e) {
-                    console.warn(`Could not convert ${file.name} to JPEG for reading all EXIF, attempting to read from original. Some fields may be unavailable.`);
-                    // If conversion fails, try reading what's possible from original (piexif might fail)
+                    console.warn(`Could not convert ${file.name} to JPEG for EXIF reading. Attempting on original.`, e);
                 }
             }
 
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => { // Always resolve, with error object if needed
                 const reader = new FileReader();
                 reader.onload = () => {
                     try {
@@ -969,135 +1309,91 @@ a.click();
                         const exifObj = piexif.load(dataUrl);
 
                         function formatGPS(gpsData, ref) {
-                            if (!gpsData || !ref || gpsData.length < 3) return null;
+                            if (!gpsData || !ref || !Array.isArray(gpsData) || gpsData.length < 3) return null;
                             return `${gpsData[0][0]/gpsData[0][1]}° ${gpsData[1][0]/gpsData[1][1]}' ${gpsData[2][0]/gpsData[2][1]}" ${ref}`;
                         }
                         function formatDateTime(dtStr) {
-                            if (!dtStr) return null;
-                            // EXIF format: "YYYY:MM:DD HH:MM:SS"
+                            if (!dtStr || typeof dtStr !== 'string') return null;
                             return dtStr.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
                         }
+                        function formatRational(rational) {
+                            if (!rational || !Array.isArray(rational) || rational.length < 2) return null;
+                            return rational[1] === 0 ? `${rational[0]}` : `${rational[0]}/${rational[1]}`; // Avoid division by zero
+                        }
+                         function formatRationalToFloat(rational, precision = 2) {
+                            if (!rational || !Array.isArray(rational) || rational.length < 2 || rational[1] === 0) return null;
+                            return (rational[0]/rational[1]).toFixed(precision);
+                        }
+
 
                         const meta = {
-                            // 0th IFD (Primary Image)
-                            imageDescription: exifObj["0th"][piexif.ImageIFD.ImageDescription] || null, // ASCII
+                            xpTitle: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPTitle]) || null,
+                            xpComment: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPComment]) || null, 
+                            xpAuthor: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPAuthor]) || null, 
+                            xpKeywords: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPKeywords]) || null,
+                            xpSubject: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPSubject]) || null,
+                            imageDescription: exifObj["0th"][piexif.ImageIFD.ImageDescription] || null,
                             make: exifObj["0th"][piexif.ImageIFD.Make] || null,
                             model: exifObj["0th"][piexif.ImageIFD.Model] || null,
                             orientation: exifObj["0th"][piexif.ImageIFD.Orientation] || null,
-                            xResolution: exifObj["0th"][piexif.ImageIFD.XResolution] ? `${exifObj["0th"][piexif.ImageIFD.XResolution][0]}/${exifObj["0th"][piexif.ImageIFD.XResolution][1]}` : null,
-                            yResolution: exifObj["0th"][piexif.ImageIFD.YResolution] ? `${exifObj["0th"][piexif.ImageIFD.YResolution][0]}/${exifObj["0th"][piexif.ImageIFD.YResolution][1]}` : null,
+                            xResolution: formatRational(exifObj["0th"][piexif.ImageIFD.XResolution]),
+                            yResolution: formatRational(exifObj["0th"][piexif.ImageIFD.YResolution]),
                             resolutionUnit: exifObj["0th"][piexif.ImageIFD.ResolutionUnit] || null,
                             software: exifObj["0th"][piexif.ImageIFD.Software] || null,
                             dateTime: formatDateTime(exifObj["0th"][piexif.ImageIFD.DateTime]) || null,
                             artist: exifObj["0th"][piexif.ImageIFD.Artist] || null,
                             copyright: exifObj["0th"][piexif.ImageIFD.Copyright] || null,
-                            // Windows XP Tags (UTF-16 LE)
-                            xpTitle: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPTitle]) || null,
-                            xpComment: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPComment]) || null, // Often used for categories by this app
-                            xpAuthor: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPAuthor]) || null, // Note: piexif.ImageIFD.Artist is more standard for artist
-                            xpKeywords: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPKeywords]) || null,
-                            xpSubject: decodeUTF16(exifObj["0th"][piexif.ImageIFD.XPSubject]) || null,
-
-                            // Exif IFD
-                            exposureTime: exifObj.Exif[piexif.ExifIFD.ExposureTime] ? `${exifObj.Exif[piexif.ExifIFD.ExposureTime][0]}/${exifObj.Exif[piexif.ExifIFD.ExposureTime][1]}s` : null,
-                            fNumber: exifObj.Exif[piexif.ExifIFD.FNumber] ? `f/${exifObj.Exif[piexif.ExifIFD.FNumber][0]/exifObj.Exif[piexif.ExifIFD.FNumber][1]}` : null,
+                            
+                            exposureTime: formatRational(exifObj.Exif[piexif.ExifIFD.ExposureTime]),
+                            fNumber: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.FNumber], 1),
                             exposureProgram: exifObj.Exif[piexif.ExifIFD.ExposureProgram] || null,
                             isoSpeedRatings: exifObj.Exif[piexif.ExifIFD.ISOSpeedRatings] || null,
                             dateTimeOriginal: formatDateTime(exifObj.Exif[piexif.ExifIFD.DateTimeOriginal]) || null,
                             dateTimeDigitized: formatDateTime(exifObj.Exif[piexif.ExifIFD.DateTimeDigitized]) || null,
-                            shutterSpeedValue: exifObj.Exif[piexif.ExifIFD.ShutterSpeedValue] ? `${exifObj.Exif[piexif.ExifIFD.ShutterSpeedValue][0]/exifObj.Exif[piexif.ExifIFD.ShutterSpeedValue][1]}` : null,
-                            apertureValue: exifObj.Exif[piexif.ExifIFD.ApertureValue] ? `${exifObj.Exif[piexif.ExifIFD.ApertureValue][0]/exifObj.Exif[piexif.ExifIFD.ApertureValue][1]}` : null,
-                            brightnessValue: exifObj.Exif[piexif.ExifIFD.BrightnessValue] ? `${exifObj.Exif[piexif.ExifIFD.BrightnessValue][0]/exifObj.Exif[piexif.ExifIFD.BrightnessValue][1]}` : null,
-                            exposureBiasValue: exifObj.Exif[piexif.ExifIFD.ExposureBiasValue] ? `${exifObj.Exif[piexif.ExifIFD.ExposureBiasValue][0]/exifObj.Exif[piexif.ExifIFD.ExposureBiasValue][1]} EV` : null,
-                            maxApertureValue: exifObj.Exif[piexif.ExifIFD.MaxApertureValue] ? `${exifObj.Exif[piexif.ExifIFD.MaxApertureValue][0]/exifObj.Exif[piexif.ExifIFD.MaxApertureValue][1]}` : null,
-                            subjectDistance: exifObj.Exif[piexif.ExifIFD.SubjectDistance] ? `${exifObj.Exif[piexif.ExifIFD.SubjectDistance][0]/exifObj.Exif[piexif.ExifIFD.SubjectDistance][1]}m` : null,
+                            shutterSpeedValue: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.ShutterSpeedValue]),
+                            apertureValue: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.ApertureValue]),
+                            brightnessValue: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.BrightnessValue]),
+                            exposureBiasValue: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.ExposureBiasValue]),
+                            maxApertureValue: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.MaxApertureValue]),
+                            subjectDistance: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.SubjectDistance]),
                             meteringMode: exifObj.Exif[piexif.ExifIFD.MeteringMode] || null,
                             flash: exifObj.Exif[piexif.ExifIFD.Flash] || null,
-                            focalLength: exifObj.Exif[piexif.ExifIFD.FocalLength] ? `${exifObj.Exif[piexif.ExifIFD.FocalLength][0]/exifObj.Exif[piexif.ExifIFD.FocalLength][1]}mm` : null,
-                            userComment: decodeUTF16(exifObj.Exif[piexif.ExifIFD.UserComment]) || null, // Often needs specific encoding, assume UTF-16 for now.
-                            subsecTime: exifObj.Exif[piexif.ExifIFD.SubSecTime] || null,
-                            subsecTimeOriginal: exifObj.Exif[piexif.ExifIFD.SubSecTimeOriginal] || null,
-                            subsecTimeDigitized: exifObj.Exif[piexif.ExifIFD.SubSecTimeDigitized] || null,
-                            flashpixVersion: exifObj.Exif[piexif.ExifIFD.FlashpixVersion] || null,
-                            colorSpace: exifObj.Exif[piexif.ExifIFD.ColorSpace] || null,
+                            focalLength: formatRationalToFloat(exifObj.Exif[piexif.ExifIFD.FocalLength], 1),
+                            userComment: decodeUTF16(exifObj.Exif[piexif.ExifIFD.UserComment]) || null,
                             pixelXDimension: exifObj.Exif[piexif.ExifIFD.PixelXDimension] || null,
                             pixelYDimension: exifObj.Exif[piexif.ExifIFD.PixelYDimension] || null,
-                            focalPlaneXResolution: exifObj.Exif[piexif.ExifIFD.FocalPlaneXResolution] ? `${exifObj.Exif[piexif.ExifIFD.FocalPlaneXResolution][0]}/${exifObj.Exif[piexif.ExifIFD.FocalPlaneXResolution][1]}` : null,
-                            focalPlaneYResolution: exifObj.Exif[piexif.ExifIFD.FocalPlaneYResolution] ? `${exifObj.Exif[piexif.ExifIFD.FocalPlaneYResolution][0]}/${exifObj.Exif[piexif.ExifIFD.FocalPlaneYResolution][1]}` : null,
-                            focalPlaneResolutionUnit: exifObj.Exif[piexif.ExifIFD.FocalPlaneResolutionUnit] || null,
-                            sensingMethod: exifObj.Exif[piexif.ExifIFD.SensingMethod] || null,
-                            fileSource: exifObj.Exif[piexif.ExifIFD.FileSource] || null,
-                            sceneType: exifObj.Exif[piexif.ExifIFD.SceneType] || null,
-                            cfaPattern: exifObj.Exif[piexif.ExifIFD.CFAPattern] || null,
-                            customRendered: exifObj.Exif[piexif.ExifIFD.CustomRendered] || null,
-                            exposureMode: exifObj.Exif[piexif.ExifIFD.ExposureMode] || null,
-                            whiteBalance: exifObj.Exif[piexif.ExifIFD.WhiteBalance] || null,
-                            digitalZoomRatio: exifObj.Exif[piexif.ExifIFD.DigitalZoomRatio] ? `${exifObj.Exif[piexif.ExifIFD.DigitalZoomRatio][0]/exifObj.Exif[piexif.ExifIFD.DigitalZoomRatio][1]}` : null,
-                            focalLengthIn35mmFilm: exifObj.Exif[piexif.ExifIFD.FocalLengthIn35mmFilm] ? `${exifObj.Exif[piexif.ExifIFD.FocalLengthIn35mmFilm]}mm` : null,
-                            sceneCaptureType: exifObj.Exif[piexif.ExifIFD.SceneCaptureType] || null,
-                            gainControl: exifObj.Exif[piexif.ExifIFD.GainControl] || null,
-                            contrast: exifObj.Exif[piexif.ExifIFD.Contrast] || null,
-                            saturation: exifObj.Exif[piexif.ExifIFD.Saturation] || null,
-                            sharpness: exifObj.Exif[piexif.ExifIFD.Sharpness] || null,
-                            subjectDistanceRange: exifObj.Exif[piexif.ExifIFD.SubjectDistanceRange] || null,
-                            lensSpecification: exifObj.Exif[piexif.ExifIFD.LensSpecification] ? exifObj.Exif[piexif.ExifIFD.LensSpecification].map(r => `${r[0]}/${r[1]}`).join(', ') : null,
+                            focalLengthIn35mmFilm: exifObj.Exif[piexif.ExifIFD.FocalLengthIn35mmFilm] || null,
+                            lensSpecification: exifObj.Exif[piexif.ExifIFD.LensSpecification] ? exifObj.Exif[piexif.ExifIFD.LensSpecification].map(r => formatRationalToFloat(r,1)).join(', ') : null,
                             lensMake: exifObj.Exif[piexif.ExifIFD.LensMake] || null,
                             lensModel: exifObj.Exif[piexif.ExifIFD.LensModel] || null,
-                            gamma: exifObj.Exif[piexif.ExifIFD.Gamma] ? exifObj.Exif[piexif.ExifIFD.Gamma][0]/exifObj.Exif[piexif.ExifIFD.Gamma][1] : null,
 
-                            // GPS IFD
-                            gpsLatitudeRef: exifObj.GPS[piexif.GPSIFD.GPSLatitudeRef] || null,
                             gpsLatitude: formatGPS(exifObj.GPS[piexif.GPSIFD.GPSLatitude], exifObj.GPS[piexif.GPSIFD.GPSLatitudeRef]) || null,
-                            gpsLongitudeRef: exifObj.GPS[piexif.GPSIFD.GPSLongitudeRef] || null,
                             gpsLongitude: formatGPS(exifObj.GPS[piexif.GPSIFD.GPSLongitude], exifObj.GPS[piexif.GPSIFD.GPSLongitudeRef]) || null,
-                            gpsAltitudeRef: exifObj.GPS[piexif.GPSIFD.GPSAltitudeRef] || null,
-                            gpsAltitude: exifObj.GPS[piexif.GPSIFD.GPSAltitude] ? `${exifObj.GPS[piexif.GPSIFD.GPSAltitude][0]/exifObj.GPS[piexif.GPSIFD.GPSAltitude][1]}m` : null,
-                            gpsTimeStamp: exifObj.GPS[piexif.GPSIFD.GPSTimeStamp] ? exifObj.GPS[piexif.GPSIFD.GPSTimeStamp].map(t => `${t[0]/t[1]}`).join(':') : null,
-                            gpsSatellites: exifObj.GPS[piexif.GPSIFD.GPSSatellites] || null,
-                            gpsStatus: exifObj.GPS[piexif.GPSIFD.GPSStatus] || null,
-                            gpsMeasureMode: exifObj.GPS[piexif.GPSIFD.GPSMeasureMode] || null,
-                            gpsDOP: exifObj.GPS[piexif.GPSIFD.GPSDOP] ? exifObj.GPS[piexif.GPSIFD.GPSDOP][0]/exifObj.GPS[piexif.GPSIFD.GPSDOP][1] : null,
-                            gpsSpeedRef: exifObj.GPS[piexif.GPSIFD.GPSSpeedRef] || null,
-                            gpsSpeed: exifObj.GPS[piexif.GPSIFD.GPSSpeed] ? exifObj.GPS[piexif.GPSIFD.GPSSpeed][0]/exifObj.GPS[piexif.GPSIFD.GPSSpeed][1] : null,
-                            gpsTrackRef: exifObj.GPS[piexif.GPSIFD.GPSTrackRef] || null,
-                            gpsTrack: exifObj.GPS[piexif.GPSIFD.GPSTrack] ? exifObj.GPS[piexif.GPSIFD.GPSTrack][0]/exifObj.GPS[piexif.GPSIFD.GPSTrack][1] : null,
-                            gpsImgDirectionRef: exifObj.GPS[piexif.GPSIFD.GPSImgDirectionRef] || null,
-                            gpsImgDirection: exifObj.GPS[piexif.GPSIFD.GPSImgDirection] ? exifObj.GPS[piexif.GPSIFD.GPSImgDirection][0]/exifObj.GPS[piexif.GPSIFD.GPSImgDirection][1] : null,
-                            gpsMapDatum: exifObj.GPS[piexif.GPSIFD.GPSMapDatum] || null,
-                            gpsDestLatitudeRef: exifObj.GPS[piexif.GPSIFD.GPSDestLatitudeRef] || null,
-                            gpsDestLatitude: formatGPS(exifObj.GPS[piexif.GPSIFD.GPSDestLatitude], exifObj.GPS[piexif.GPSIFD.GPSDestLatitudeRef]) || null,
-                            gpsDestLongitudeRef: exifObj.GPS[piexif.GPSIFD.GPSDestLongitudeRef] || null,
-                            gpsDestLongitude: formatGPS(exifObj.GPS[piexif.GPSIFD.GPSDestLongitude], exifObj.GPS[piexif.GPSIFD.GPSDestLongitudeRef]) || null,
-                            gpsDestBearingRef: exifObj.GPS[piexif.GPSIFD.GPSDestBearingRef] || null,
-                            gpsDestBearing: exifObj.GPS[piexif.GPSIFD.GPSDestBearing] ? exifObj.GPS[piexif.GPSIFD.GPSDestBearing][0]/exifObj.GPS[piexif.GPSIFD.GPSDestBearing][1] : null,
-                            gpsDestDistanceRef: exifObj.GPS[piexif.GPSIFD.GPSDestDistanceRef] || null,
-                            gpsDestDistance: exifObj.GPS[piexif.GPSIFD.GPSDestDistance] ? exifObj.GPS[piexif.GPSIFD.GPSDestDistance][0]/exifObj.GPS[piexif.GPSIFD.GPSDestDistance][1] : null,
-                            gpsProcessingMethod: exifObj.GPS[piexif.GPSIFD.GPSProcessingMethod] || null,
-                            gpsAreaInformation: exifObj.GPS[piexif.GPSIFD.GPSAreaInformation] || null,
+                            gpsAltitude: exifObj.GPS[piexif.GPSIFD.GPSAltitude] ? formatRationalToFloat(exifObj.GPS[piexif.GPSIFD.GPSAltitude], 0) + 'm' : null,
+                            gpsTimeStamp: exifObj.GPS[piexif.GPSIFD.GPSTimeStamp] ? exifObj.GPS[piexif.GPSIFD.GPSTimeStamp].map(t => formatRationalToFloat(t,0)).join(':') : null,
                             gpsDateStamp: exifObj.GPS[piexif.GPSIFD.GPSDateStamp] || null,
-                            gpsDifferential: exifObj.GPS[piexif.GPSIFD.GPSDifferential] || null,
                         };
                         resolve(meta);
                     } catch (error) {
-                         if (error.message.includes("Given data is not JPEG.") && file.type !== 'image/jpeg') {
-                            resolve({ error: `File type (${file.type}) is not JPEG and could not be fully parsed for EXIF. Try converting to JPEG first for complete EXIF reading. Some basic info might be missing.` });
+                         if (error.message.includes("Given data is not JPEG.") || error.message.includes("Given data is not TIFF.")) {
+                            resolve({ error: `File type (${file.type}) is not directly supported by EXIF parser or could not be converted. Try converting to JPEG/TIFF first.` });
                         } else if (error.message.includes("Given data is not EXIF.")) {
                              resolve({ error: "No EXIF data found in this image." });
                         } else {
                             console.error('Error parsing EXIF data:', error);
-                            reject(new Error('Failed to parse EXIF data.'));
+                            resolve({ error: 'Failed to parse EXIF data. The file might be corrupted or not contain standard EXIF.' });
                         }
                     }
                 };
-                reader.onerror = () => reject(new Error('FileReader failed.'));
-                reader.readAsDataURL(fileToRead); // Read the (potentially converted) JPEG file
+                reader.onerror = () => resolve({ error: 'FileReader failed to read the image.'});
+                reader.readAsDataURL(fileToRead);
             });
         }
         
         function displayAllMetadataHTML(metadata, filename) {
             if (metadata.error) {
                 return `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
-                            <p class="font-bold">Notice</p>
+                            <p class="font-bold">Notice for ${filename}</p>
                             <p>${metadata.error}</p>
                         </div>`;
             }
@@ -1106,60 +1402,43 @@ a.click();
             const sections = {
                 'App Specific (XP Tags)': ['xpTitle', 'xpSubject', 'xpKeywords', 'xpComment', 'xpAuthor'],
                 'Primary Image': ['imageDescription', 'make', 'model', 'orientation', 'xResolution', 'yResolution', 'resolutionUnit', 'software', 'dateTime', 'artist', 'copyright'],
-                'Camera & Exposure': ['exposureTime', 'fNumber', 'exposureProgram', 'isoSpeedRatings', 'shutterSpeedValue', 'apertureValue', 'brightnessValue', 'exposureBiasValue', 'maxApertureValue', 'subjectDistance', 'meteringMode', 'flash', 'focalLength', 'focalLengthIn35mmFilm', 'customRendered', 'exposureMode', 'whiteBalance', 'digitalZoomRatio', 'sceneCaptureType', 'gainControl', 'contrast', 'saturation', 'sharpness', 'subjectDistanceRange', 'lensSpecification', 'lensMake', 'lensModel', 'gamma'],
-                'Date & Time': ['dateTimeOriginal', 'dateTimeDigitized', 'subsecTime', 'subsecTimeOriginal', 'subsecTimeDigitized'],
-                'Image Properties': ['flashpixVersion', 'colorSpace', 'pixelXDimension', 'pixelYDimension', 'focalPlaneXResolution', 'focalPlaneYResolution', 'focalPlaneResolutionUnit', 'sensingMethod', 'fileSource', 'sceneType', 'cfaPattern'],
-                'GPS Data': ['gpsLatitude', 'gpsLongitude', 'gpsAltitude', 'gpsTimeStamp', 'gpsSatellites', 'gpsStatus', 'gpsMeasureMode', 'gpsDOP', 'gpsSpeed', 'gpsTrack', 'gpsImgDirection', 'gpsMapDatum', 'gpsDestLatitude', 'gpsDestLongitude', 'gpsDestBearing', 'gpsDestDistance', 'gpsProcessingMethod', 'gpsAreaInformation', 'gpsDateStamp', 'gpsDifferential'],
+                'Camera & Exposure': ['exposureTime', 'fNumber', 'exposureProgram', 'isoSpeedRatings', 'shutterSpeedValue', 'apertureValue', 'brightnessValue', 'exposureBiasValue', 'maxApertureValue', 'subjectDistance', 'meteringMode', 'flash', 'focalLength', 'focalLengthIn35mmFilm', 'lensSpecification', 'lensMake', 'lensModel'],
+                'Date & Time': ['dateTimeOriginal', 'dateTimeDigitized'],
+                'Image Dimensions': ['pixelXDimension', 'pixelYDimension'],
+                'GPS Data': ['gpsLatitude', 'gpsLongitude', 'gpsAltitude', 'gpsTimeStamp', 'gpsDateStamp'],
                 'Other': ['userComment']
             };
-
+            
+            let foundAnyData = false;
             for (const sectionTitle in sections) {
-                const fieldsInSection = sections[sectionTitle].filter(key => metadata[key] !== null && typeof metadata[key] !== 'undefined' && metadata[key] !== "");
+                const fieldsInSection = sections[sectionTitle].filter(key => metadata[key] !== null && typeof metadata[key] !== 'undefined' && String(metadata[key]).trim() !== "");
                 if (fieldsInSection.length === 0) continue;
-
+                
+                foundAnyData = true;
                 html += `<div class="mb-6 p-4 bg-white rounded-lg shadow ring-1 ring-slate-200">
                             <h3 class="text-lg font-semibold text-slate-700 border-b border-slate-200 pb-2 mb-3">${sectionTitle}</h3>
                             <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">`;
                 fieldsInSection.forEach(key => {
                     const value = metadata[key];
-                    // Simple formatting for array values (e.g. LensSpecification)
-                    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                    const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+                    const displayName = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 
                     html += `
-                        <div class="py-1">
-                            <dt class="font-medium text-slate-600">${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</dt>
-                            <dd class="text-slate-800">${displayValue}</dd>
+                        <div class="py-1 break-words">
+                            <dt class="font-medium text-slate-600">${displayName}:</dt>
+                            <dd class="text-slate-800 whitespace-pre-wrap">${displayValue}</dd>
                         </div>
                     `;
                 });
                 html += `</dl></div>`;
             }
-            if (html === `<h2 class="text-xl font-semibold text-blue-600 mb-4">Metadata for ${filename}</h2>`) { // No metadata found after filtering
+            if (!foundAnyData) { 
                 html += '<p class="text-slate-500 italic">No significant EXIF data found for this image.</p>';
             }
             return html;
         }
 
         // --- Tab: Delete Metadata ---
-        const deleteImageFileInput = document.getElementById('deleteImageFile');
-        const deleteMetadataBtn = document.getElementById('deleteMetadataBtn');
-        const deleteImagePreview = document.getElementById('deleteImagePreview');
-
-        deleteImageFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    deleteImagePreview.src = e.target.result;
-                    deleteImagePreview.classList.remove('hidden');
-                }
-                reader.readAsDataURL(file);
-            } else {
-                deleteImagePreview.classList.add('hidden');
-                deleteImagePreview.src = "#";
-            }
-        });
-        
         deleteMetadataBtn.addEventListener('click', async () => {
             const file = deleteImageFileInput.files[0];
             if (!file) {
@@ -1179,13 +1458,12 @@ a.click();
                         let dataUrl = e_reader.target.result;
                         let exifObj = piexif.load(dataUrl);
 
-                        // Clear specific XP tags and software tag
                         delete exifObj["0th"][piexif.ImageIFD.XPTitle];
                         delete exifObj["0th"][piexif.ImageIFD.XPSubject];
                         delete exifObj["0th"][piexif.ImageIFD.XPKeywords];
                         delete exifObj["0th"][piexif.ImageIFD.XPComment];
-                        delete exifObj["0th"][piexif.ImageIFD.XPAuthor]; // If you set this
-                        delete exifObj["0th"][piexif.ImageIFD.Software]; // If you set this
+                        delete exifObj["0th"][piexif.ImageIFD.XPAuthor]; 
+                        delete exifObj["0th"][piexif.ImageIFD.Software]; 
 
                         const exifBytes = piexif.dump(exifObj);
                         const updatedDataUrl = piexif.insert(exifBytes, dataUrl);
@@ -1205,9 +1483,11 @@ a.click();
                         document.body.removeChild(a);
                         URL.revokeObjectURL(url);
                         showToast('App-specific metadata cleared and download started.', 'success');
-                        deleteImageFileInput.value = null; // Clear file input
+                        deleteImageFileInput.value = null; 
                         deleteImagePreview.classList.add('hidden');
                         deleteImagePreview.src = "#";
+                        const dropZonePara = document.querySelector('#deleteFileDropZone p');
+                        if (dropZonePara) dropZonePara.textContent = document.getElementById('deleteFileDropZone').dataset.defaultText || "Drag 'n' drop a JPEG image here, or click to select";
 
                     } catch (exifError) {
                         console.error("EXIF processing error during delete:", exifError);
@@ -1234,16 +1514,11 @@ a.click();
 
 
         // --- Tab: Convert to JPEG ---
-        const convertImageFilesInput = document.getElementById('convertImageFiles');
-        const jpegQualitySlider = document.getElementById('jpegQuality');
-        const jpegQualityValueSpan = document.getElementById('jpegQualityValue');
-        const convertBtn = document.getElementById('convertBtn');
-        const convertResultsDiv = document.getElementById('convertResults');
-        const downloadAllConvertedBtn = document.getElementById('downloadAllConvertedBtn');
-
-        jpegQualitySlider.addEventListener('input', (e) => {
-            jpegQualityValueSpan.textContent = e.target.value;
-        });
+        if (jpegQualitySlider) {
+            jpegQualitySlider.addEventListener('input', (e) => {
+                if(jpegQualityValueSpan) jpegQualityValueSpan.textContent = e.target.value;
+            });
+        }
 
         convertBtn.addEventListener('click', async () => {
             const files = convertImageFilesInput.files;
@@ -1257,32 +1532,36 @@ a.click();
             convertResultsDiv.innerHTML = '';
             convertedFilesData = [];
             downloadAllConvertedBtn.style.display = 'none';
+            updateProgressBar(0, files.length, "Starting conversion...");
 
             try {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    updateProgressBar(i, files.length, `Converting ${file.name}...`);
+                    updateProgressBar(i + 1, files.length, `Converting ${file.name}...`);
                     showLoader(`Converting ${file.name} (${i+1}/${files.length})`);
 
                     if (!file.type.startsWith('image/')) {
                         showToast(`${file.name} is not an image. Skipped.`, 'warning');
-                        if (i === files.length -1) updateProgressBar(i+1, files.length, `Converting ${file.name}...`); // update progress if last
+                         const errorCard = document.createElement('div');
+                        errorCard.className = 'bg-yellow-50 rounded-lg shadow p-3 mb-3 ring-1 ring-yellow-200';
+                        errorCard.innerHTML = `<p class="font-medium text-yellow-700">${file.name} - Skipped (not an image)</p>`;
+                        convertResultsDiv.appendChild(errorCard);
                         continue;
                     }
                     
                     try {
                         const convertedBlob = await convertToJpeg(file, quality);
-                        const newFileName = `${file.name.replace(/\.[^/.]+$/, '')}_q${quality*100}.jpg`;
+                        const newFileName = `${file.name.replace(/\.[^/.]+$/, '')}_q${parseInt(jpegQualitySlider.value)}.jpg`;
                         convertedFilesData.push({ blob: convertedBlob, newName: newFileName, originalName: file.name });
 
                         const resultCard = document.createElement('div');
-                        resultCard.className = 'bg-slate-50 rounded-lg shadow p-3 mb-3 ring-1 ring-slate-200 flex justify-between items-center';
+                        resultCard.className = 'bg-slate-50 rounded-lg shadow p-3 mb-3 ring-1 ring-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2';
                         resultCard.innerHTML = `
-                            <div>
-                                <p class="font-medium text-slate-700">${file.name} <span class="text-xs text-slate-500">(${ (file.size / 1024).toFixed(1)}KB)</span></p>
-                                <p class="text-sm text-green-600">Converted to: ${newFileName} <span class="text-xs text-slate-500">(${(convertedBlob.size / 1024).toFixed(1)}KB)</span></p>
+                            <div class="text-sm">
+                                <p class="font-medium text-slate-700 truncate" title="${file.name}">${file.name} <span class="text-xs text-slate-500">(${(file.size / 1024).toFixed(1)}KB)</span></p>
+                                <p class="text-green-600 truncate" title="${newFileName}">Converted: ${newFileName} <span class="text-xs text-slate-500">(${(convertedBlob.size / 1024).toFixed(1)}KB)</span></p>
                             </div>
-                            <button data-index="${convertedFilesData.length - 1}" class="download-converted-btn px-3 py-1.5 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 whitespace-nowrap">
+                            <button data-index="${convertedFilesData.length - 1}" class="download-converted-btn mt-1 sm:mt-0 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 whitespace-nowrap shrink-0">
                                 Download
                             </button>
                         `;
@@ -1296,13 +1575,19 @@ a.click();
                         convertResultsDiv.appendChild(errorCard);
                     }
                 }
-                updateProgressBar(files.length, files.length, "All files processed!");
-                showToast(`Finished converting ${files.length} image(s).`, 'success');
+                updateProgressBar(files.length, files.length, "All files processed for conversion!");
                 if (convertedFilesData.length > 0) {
+                    showToast(`Finished converting ${convertedFilesData.length} image(s).`, 'success');
                     downloadAllConvertedBtn.style.display = 'flex';
+                } else if (files.length > 0) {
+                    showToast(`Conversion process completed, but no files were successfully converted.`, 'warning');
                 }
-                 convertImageFilesInput.value = null; // Clear file input
-                 document.getElementById('convertImageList').innerHTML = '';
+
+                 convertImageFilesInput.value = null; 
+                 const imageListElem = document.getElementById('convertImageList');
+                 if (imageListElem) imageListElem.innerHTML = '';
+                 const dropZonePara = document.querySelector('#convertFileDropZone p');
+                 if(dropZonePara) dropZonePara.textContent = document.getElementById('convertFileDropZone').dataset.defaultText || "Drag 'n' drop images here, or click to select";
 
 
             } catch (error) {
@@ -1315,11 +1600,11 @@ a.click();
         });
 
         convertResultsDiv.addEventListener('click', (e) => {
-            if (e.target.classList.contains('download-converted-btn') || e.target.closest('.download-converted-btn')) {
-                const button = e.target.classList.contains('download-converted-btn') ? e.target : e.target.closest('.download-converted-btn');
+            const button = e.target.closest('.download-converted-btn');
+            if (button) {
                 const index = parseInt(button.dataset.index);
                 const fileData = convertedFilesData[index];
-                if (fileData) {
+                if (fileData && fileData.blob && fileData.blob.size > 0) {
                     const url = URL.createObjectURL(fileData.blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -1328,21 +1613,25 @@ a.click();
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
+                } else {
+                     showToast('Error: Converted file data is invalid or empty.', 'error');
                 }
             }
         });
         
         downloadAllConvertedBtn.addEventListener('click', async () => {
-            if (convertedFilesData.length === 0) {
-                showToast('No converted files to download.', 'info');
+            const validFilesToZip = convertedFilesData.filter(fd => fd.blob && fd.blob.size > 0);
+            if (validFilesToZip.length === 0) {
+                showToast('No valid converted files to download.', 'info');
                 return;
             }
             showLoader('Zipping converted files...');
             const zip = new JSZip();
-            convertedFilesData.forEach(fileData => {
+            validFilesToZip.forEach(fileData => {
                 zip.file(fileData.newName, fileData.blob);
             });
             try {
+                updateProgressBar(0, 100, `Zipping... 0%`);
                 const content = await zip.generateAsync({type: 'blob'}, (metadata) => {
                     updateProgressBar(Math.floor(metadata.percent), 100, `Zipping... ${Math.floor(metadata.percent)}%`);
                 });
@@ -1355,28 +1644,17 @@ a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 showToast('Converted images zip download started.', 'success');
+                updateProgressBar(100, 100, `Zipping complete!`);
             } catch (error) {
                 console.error("Error creating zip for converted files:", error);
                 showToast('Error creating zip file for converted images.', 'error');
+                updateProgressBar(0,0, "Zipping failed.");
             } finally {
                 hideLoader();
-                 updateProgressBar(1,1, "Zipping complete.");
             }
         });
 
-
         // --- Tab: Batch Edit Metadata ---
-        const batchEditImageFilesInput = document.getElementById('batchEditImageFiles');
-        const batchTitleInput = document.getElementById('batchTitle');
-        const batchSubjectInput = document.getElementById('batchSubject');
-        const batchKeywordsInput = document.getElementById('batchKeywords');
-        const batchCopyrightInput = document.getElementById('batchCopyright');
-        const batchAuthorInput = document.getElementById('batchAuthor');
-        const batchSoftwareInput = document.getElementById('batchSoftware');
-        const batchEditApplyBtn = document.getElementById('batchEditApplyBtn');
-        const batchEditResultsDiv = document.getElementById('batchEditResults');
-
-
         batchEditApplyBtn.addEventListener('click', async () => {
             const files = batchEditImageFilesInput.files;
             if (files.length === 0) {
@@ -1387,62 +1665,71 @@ a.click();
             const commonMetadata = {
                 title: batchTitleInput.value.trim(),
                 subject: batchSubjectInput.value.trim(),
-                newKeywords: batchKeywordsInput.value.trim(), // New keywords to add/replace
+                newKeywords: batchKeywordsInput.value.trim(), 
                 keywordAction: document.querySelector('input[name="keywordAction"]:checked').value,
                 copyright: batchCopyrightInput.value.trim(),
                 author: batchAuthorInput.value.trim(),
-                software: batchSoftwareInput.value.trim() || "Metadata Manager Pro by Faris - Glyphiez @ Indonesia 2024", // Default if empty
+                software: batchSoftwareInput.value.trim(), 
                 categories: getSelectedCategories('batchEditCategoryGrid')
             };
             
-            // Check if any metadata is actually provided for edit
             const isAnyMetadataToApply = Object.values(commonMetadata).some(val => 
                 (typeof val === 'string' && val !== '') || (Array.isArray(val) && val.length > 0)
-            ) || commonMetadata.software; // Software has a default
+            );
 
-            if (!isAnyMetadataToApply) {
-                showToast('Please provide at least one metadata field to apply.', 'warning');
-                return;
+            if (!isAnyMetadataToApply && !commonMetadata.software) { // Check if software explicitly set to empty
+                 if (batchSoftwareInput.value.trim() === '' && batchSoftwareInput.defaultValue !== ''){
+                     // If user cleared default software, consider it an action
+                 } else if (!isAnyMetadataToApply) {
+                    showToast('Please provide at least one metadata field to apply.', 'warning');
+                    return;
+                 }
             }
 
 
             showLoader('Preparing for batch edit...');
             batchEditedFilesData = [];
-            batchEditResultsDiv.innerHTML = ''; // Clear previous results
+            batchEditResultsDiv.innerHTML = '';
+            updateProgressBar(0, files.length, "Starting batch edit...");
+
 
             try {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    updateProgressBar(i, files.length, `Batch editing ${file.name}...`);
+                    updateProgressBar(i + 1, files.length, `Batch editing ${file.name}...`);
                     showLoader(`Batch editing ${file.name} (${i+1}/${files.length})`);
 
                     if (file.type !== 'image/jpeg') {
                          showToast(`${file.name} is not a JPEG. Batch edit currently supports JPEGs only. Skipped.`, 'warning');
-                         if (i === files.length -1) updateProgressBar(i+1, files.length, `Batch editing ${file.name}...`);
+                         const errorCard = document.createElement('div');
+                        errorCard.className = 'bg-yellow-50 rounded-lg shadow p-3 mb-3 ring-1 ring-yellow-200';
+                        errorCard.innerHTML = `<p class="font-medium text-yellow-700">${file.name} - Skipped (not JPEG)</p>`;
+                        batchEditResultsDiv.appendChild(errorCard);
                          continue;
                     }
                     
-                    // 1. Read existing metadata to handle placeholders and keyword append
                     let existingMetadata = {};
                     try {
-                        existingMetadata = await readAllMetadata(file); // Using the comprehensive reader
-                        if(existingMetadata.error) existingMetadata = {}; // Reset if error reading
+                        const readResult = await readAllMetadata(file); 
+                        if(!readResult.error) existingMetadata = readResult;
                     } catch (e) {
-                        console.warn(`Could not read existing metadata for ${file.name} during batch edit. Placeholders might not work.`, e);
+                        console.warn(`Could not read existing metadata for ${file.name} during batch edit.`, e);
                     }
 
-                    // 2. Prepare metadata to apply for this specific file
                     const metadataToApply = {};
-                    
-                    // Handle placeholders: {filename}, {original_title}, {original_subject}, {date} (current date)
+                    const currentDate = new Date();
                     const placeholders = {
                         '{filename}': file.name.replace(/\.[^/.]+$/, ''),
                         '{original_title}': existingMetadata.xpTitle || '',
                         '{original_subject}': existingMetadata.xpSubject || '',
-                        '{date}': new Date().toLocaleDateString()
+                        '{date}': currentDate.toLocaleDateString(),
+                        '{year}': currentDate.getFullYear().toString(),
+                        '{month}': (currentDate.getMonth() + 1).toString().padStart(2,'0'),
+                        '{day}': currentDate.getDate().toString().padStart(2,'0'),
                     };
 
                     function replacePlaceholders(text) {
+                        if (!text || typeof text !== 'string') return text;
                         let result = text;
                         for (const key in placeholders) {
                             result = result.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), placeholders[key]);
@@ -1454,46 +1741,55 @@ a.click();
                     if (commonMetadata.subject) metadataToApply.subject = replacePlaceholders(commonMetadata.subject);
                     if (commonMetadata.copyright) metadataToApply.copyright = replacePlaceholders(commonMetadata.copyright);
                     if (commonMetadata.author) metadataToApply.author = replacePlaceholders(commonMetadata.author);
-                    if (commonMetadata.software) metadataToApply.software = replacePlaceholders(commonMetadata.software);
+                    
+                    // Handle software: if user provides input, use it. If blank, use existing or default. If null, clear it.
+                    if (commonMetadata.software) {
+                        metadataToApply.software = replacePlaceholders(commonMetadata.software);
+                    } else if (batchSoftwareInput.value.trim() === '' && batchSoftwareInput.defaultValue !== ''){ 
+                        // User explicitly cleared the software field that had a default
+                        metadataToApply.software = null; // Signal to remove/clear the software tag
+                    } // Otherwise, existing software tag will be preserved by createExifImage or default applied if none.
 
-                    // Keywords
+
                     if (commonMetadata.newKeywords) {
                         const newKeywordsArray = commonMetadata.newKeywords.split(',').map(k => k.trim()).filter(k => k);
                         if (commonMetadata.keywordAction === 'append') {
                             const existingKeywordsArray = (existingMetadata.xpKeywords || "").split(',').map(k => k.trim()).filter(k => k);
                             metadataToApply.keywords = [...new Set([...existingKeywordsArray, ...newKeywordsArray])].join(', ');
-                        } else { // Replace
+                        } else { 
                             metadataToApply.keywords = newKeywordsArray.join(', ');
                         }
                     }
 
-                    // Categories (append)
                     if (commonMetadata.categories.length > 0) {
                         const existingCategoriesArray = (existingMetadata.xpComment || "").split(';').map(c => c.trim()).filter(c => c);
-                        metadataToApply.categories = [...new Set([...existingCategoriesArray, ...commonMetadata.categories])]; // Stored as array for createExifImage
+                        metadataToApply.categories = [...new Set([...existingCategoriesArray, ...commonMetadata.categories])]; 
                     }
                     
-                    const processedBlob = await createExifImage(file, metadataToApply); // createExifImage needs to handle partial metadata
+                    const processedBlob = await createExifImage(file, metadataToApply); 
                     const newFileName = `batchedited_${file.name}`;
                     batchEditedFilesData.push({ blob: processedBlob, newName: newFileName });
 
                     const card = document.createElement('div');
                     card.className = 'bg-slate-50 rounded-lg shadow p-3 mb-3 ring-1 ring-slate-200';
-                    card.innerHTML = `<p class="font-medium text-slate-700">${file.name} -> ${newFileName}</p>
-                                      <p class="text-xs text-green-600">Metadata applied successfully.</p>`;
+                    card.innerHTML = `<p class="font-medium text-slate-700 truncate" title="${file.name} -> ${newFileName}">${file.name} -> ${newFileName}</p>
+                                      <p class="text-xs text-green-600">Batch metadata applied.</p>`;
                     batchEditResultsDiv.appendChild(card);
                 }
 
                 updateProgressBar(files.length, files.length, "Batch edit complete!");
-                showToast(`Batch edit applied to ${batchEditedFilesData.length} image(s).`, 'success');
                 
                 if (batchEditedFilesData.length > 0) {
-                    // Automatically trigger download all for batch edit
+                    showToast(`Batch edit applied to ${batchEditedFilesData.length} image(s).`, 'success');
+                    showLoader('Zipping batch edited files...');
                     const zip = new JSZip();
                     batchEditedFilesData.forEach(fileData => {
                         zip.file(fileData.newName, fileData.blob);
                     });
-                    const content = await zip.generateAsync({ type: 'blob' });
+                    updateProgressBar(0,100, "Zipping...");
+                    const content = await zip.generateAsync({ type: 'blob' }, (zipMeta) => {
+                         updateProgressBar(Math.floor(zipMeta.percent), 100, `Zipping... ${Math.floor(zipMeta.percent)}%`);
+                    });
                     const url = URL.createObjectURL(content);
                     const a = document.createElement('a');
                     a.href = url;
@@ -1503,9 +1799,16 @@ a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                     showToast('Batch edited images zip download started.', 'success');
+                    updateProgressBar(100,100, "Zipping complete!");
+                } else if (files.length > 0) {
+                     showToast(`Batch edit process completed, but no files were successfully edited.`, 'warning');
                 }
-                batchEditImageFilesInput.value = null; // Clear file input
-                document.getElementById('batchEditImageList').innerHTML = '';
+                batchEditImageFilesInput.value = null;
+                const imageListElem = document.getElementById('batchEditImageList');
+                if(imageListElem) imageListElem.innerHTML = '';
+                const dropZonePara = document.querySelector('#batchEditFileDropZone p');
+                if (dropZonePara) dropZonePara.textContent = document.getElementById('batchEditFileDropZone').dataset.defaultText || "Drag 'n' drop JPEG images here, or click to select";
+
 
             } catch (error) {
                 console.error('Error during batch edit:', error);
@@ -1516,38 +1819,51 @@ a.click();
             }
         });
 
-
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Tab switching logic
-            Object.values(TABS).forEach(({ btn, content }) => {
-                btn.addEventListener('click', () => {
-                    Object.values(TABS).forEach(t => {
-                        t.btn.classList.remove('tab-active');
-                        t.content.classList.add('hidden');
-                    });
-                    btn.classList.add('tab-active');
-                    content.classList.remove('hidden');
-                    // Reset progress bar on tab switch
+            const tabButtons = Object.values(TABS).map(tab => tab.btn);
+            const tabContents = Object.values(TABS).map(tab => tab.content);
+
+            tabButtons.forEach((button, index) => {
+                if (!button) return; // Skip if a button ID was mistyped or element not found
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => { if(btn) btn.classList.remove('tab-active');});
+                    button.classList.add('tab-active');
+                    tabContents.forEach(content => { if(content) content.classList.add('hidden');});
+                    if (tabContents[index]) tabContents[index].classList.remove('hidden');
+                    else console.warn("Tab content not found for button:", button.id);
                     globalProgressContainer.classList.add('hidden'); 
                 });
             });
+            
+            // Default active tab
+            if (TABS.generateImage.btn) { // Check if exists
+                 TABS.generateImage.btn.click();
+            } else if (TABS.generate.btn) { // Fallback
+                 TABS.generate.btn.click();
+            }
 
-            // Populate category grids
+
             populateCategoryGrid('generateCategoryGrid');
             populateCategoryGrid('batchEditCategoryGrid');
 
-            // Setup Drag and Drop zones
             setupDragAndDrop('generateFileDropZone', 'imageFiles', 'generateImageList');
             setupDragAndDrop('readFileDropZone', 'readImageFile', null, 'readImagePreview', true);
             setupDragAndDrop('deleteFileDropZone', 'deleteImageFile', null, 'deleteImagePreview', true);
             setupDragAndDrop('convertFileDropZone', 'convertImageFiles', 'convertImageList');
             setupDragAndDrop('batchEditFileDropZone', 'batchEditImageFiles', 'batchEditImageList');
-
-            // Set default software for batch edit if desired
-            // batchSoftwareInput.value = "My Custom Software";
+            
+            // For file inputs not in drop zones, simple name display
+            [jsonMetadataFileInput, imageJsonParamsFileInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('change', () => {
+                        if (input.files.length > 0) {
+                             showToast(`${input.files[0].name} selected.`, 'info', 2000);
+                        }
+                    });
+                }
+            });
         });
-
     </script>
 </body>
 </html>
