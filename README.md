@@ -89,4 +89,4 @@ This tool was created with the intent to simplify image metadata management whil
 This project is licensed under the MIT License. Feel free to use, modify, and distribute as needed.
 
 ## Author
-**Faris - Glyphiez**
+**Glyphiez**
