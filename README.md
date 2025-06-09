@@ -1,5 +1,14 @@
-# Enhanced Metadata Manager
+> ## 📢 Important Announcement: Project Has Moved
+>
+> This project, the **Enhanced Metadata Manager**, has evolved significantly and is now integrated into our new, all-in-one **[AI Content Suite](PASTE_YOUR_NEW_REPO_LINK_HERE)**. Due to the scale of these changes, it's no longer feasible to maintain it as a standalone repository.
+>
+> This repository is now **archived** and will no longer receive updates. For the latest version, new features, and all future development, please visit the new repository.
+>
+> **➡️ Please follow this link to the new project: [AI Content Suite](PASTE_YOUR_NEW_REPO_LINK_HERE)**
+>
+> Thank you for your support!
 
+# Enhanced Metadata Manager
 The Enhanced Metadata Manager is a versatile, user-friendly web application that allows you to manage, modify, and optimize image metadata. Whether you are a professional photographer, a content creator, or just someone who wants better organization of images, this tool is built for you.
 
 You Can Access it Via [Netlify](https://exifly.netlify.app) or [Vercel](exifly.vercel.app)
